@@ -1,13 +1,14 @@
 package culturelog.rest.domain;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author Jan Venstermans
  */
+@Document(collection = "users")
 public class User {
 
     @Id
@@ -21,6 +22,7 @@ public class User {
     /**
      * TODO: required and encrypted.
      */
+    @NotNull
     private String password;
 
     private boolean active;

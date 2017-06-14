@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Jan Venstermans
  */
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
 public class UserController {
 
     @Autowired

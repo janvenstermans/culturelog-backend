@@ -15,8 +15,9 @@ import java.util.List;
 /**
  * @author Jan Venstermans
  */
-@RestController
-@RequestMapping("/experiences")
+//TODO: check later
+//@RestController
+//@RequestMapping("/experiences")
 public class ExperiencesController {
 
     @Autowired

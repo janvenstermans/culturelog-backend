@@ -5,6 +5,7 @@ import culturelog.rest.dto.UserCreateDto;
 import culturelog.rest.dto.UserDto;
 import culturelog.rest.exception.CultureLogException;
 import culturelog.rest.repository.UserRepository;
+import culturelog.rest.utils.CultureLogUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -39,12 +40,16 @@ public class UserService {
         }
         String username = userCreateDto.getUsername();
         String password = userCreateDto.getPassword();
-        if (Utils.isNullOrEmpty(username) || Utils.isNullOrEmpty(password)) {
+        if (CultureLogUtils.isNullOrEmpty(username) || CultureLogUtils.isNullOrEmpty(password)) {
             throw new CultureLogException("Cannot create user: username or password not provided");
         }
         // check if username is not yet in db
         if (getByUserName(username) != null) {
             throw new CultureLogException("Cannot create user: username allready in use");
+        }
+        // check if username is email
+        if (!CultureLogUtils.isEmail(username)) {
+            throw new CultureLogException("Cannot create user: username must be email");
         }
         // don't save the given user object, create new object and save some attributes
         User newUser = new User();

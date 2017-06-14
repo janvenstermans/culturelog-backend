@@ -3,6 +3,7 @@ package culturelog.rest.service;
 import culturelog.rest.domain.Experience;
 import culturelog.rest.exception.CultureLogException;
 import culturelog.rest.repository.ExperienceRepository;
+import culturelog.rest.utils.CultureLogUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,10 +35,10 @@ public class ExperienceService {
         if (experience == null) {
             return;
         }
-        if (Utils.isNullOrEmpty(experience.getUsername())) {
+        if (CultureLogUtils.isNullOrEmpty(experience.getUsername())) {
             throw new CultureLogException("Cannot save experience with empty field username");
         }
-        if (Utils.isNullOrEmpty(experience.getTitle())) {
+        if (CultureLogUtils.isNullOrEmpty(experience.getTitle())) {
             throw new CultureLogException("Cannot save experience with empty field title");
         }
         if (experience.getDate() == null) {
