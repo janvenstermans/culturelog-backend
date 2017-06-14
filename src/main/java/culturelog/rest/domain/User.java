@@ -22,7 +22,6 @@ public class User {
     /**
      * TODO: required and encrypted.
      */
-    @NotNull
     private String password;
 
     private boolean active;

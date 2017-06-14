@@ -17,12 +17,28 @@ public class CultureLogSecurityService {
     }
 
     public String getLoggedInUsername() {
+        CultureLogUserDetails userDetails = getLoggedInCultureLogUserDetails();
+        if (userDetails != null) {
+            return userDetails.getUsername();
+        }
+        return null;
+    }
+
+    public String getLoggedInUserId() {
+        CultureLogUserDetails userDetails = getLoggedInCultureLogUserDetails();
+        if (userDetails != null) {
+            return userDetails.getUserId();
+        }
+        return null;
+    }
+
+    private CultureLogUserDetails getLoggedInCultureLogUserDetails() {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         Authentication authentication = securityContext.getAuthentication();
         if (authentication != null && authentication.getPrincipal() != null) {
             if (authentication.getPrincipal() instanceof CultureLogUserDetails) {
                 CultureLogUserDetails userDetails = (CultureLogUserDetails) authentication.getPrincipal();
-                return userDetails.getUsername();
+                return userDetails;
             } else {
                 //what than?
             }

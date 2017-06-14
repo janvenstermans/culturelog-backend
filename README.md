@@ -39,19 +39,31 @@ Login/password security is used.
 
 currently, user and experience endpoints exist
 
+Default api url startpoint is host/api/...
+
 ### User endpoint
 
-create user: POST /user/register , body Json object UserCreateDto
+create user: POST /users/register , body Json object UserCreateDto
 
-(TODO) update user (not username or password): PUT /user/update , body Json object UserDto
+(TODO) update user (not username or password): PUT /users/update , body Json object UserDto
 
-(TODO) change user password: PUT /user/changePassword , body Json object UserCreateDto
+(TODO) change user password: PUT /users/changePassword , body Json object UserCreateDto
 
-### Experience endpoints
+### Locations endpoints
+
+create a location for logged in user: POST /locations , body Json object LocationDto
+
+get all locations of logged in user: GET /locations
+
+get one location of logged in user: GET /locations/{locationId}
+
+update a location of logged in user: GET /locations/{locationId} , body Json object LocationDto
+
+### (Experience endpoints: made unavailable)
 
 create experience for logged in user: POST /experiences , body Json object Experience
 
-get all experiencea of logged in user: GET /experiences
+get all experiences of logged in user: GET /experiences
 
 get one experience of logged in user: GET /experiences/{experienceId}
 

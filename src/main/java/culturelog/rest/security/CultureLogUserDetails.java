@@ -55,4 +55,8 @@ public class CultureLogUserDetails implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
+    public String getUserId() {
+        return user != null ? user.getId() : null;
+    }
 }
