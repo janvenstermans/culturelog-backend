@@ -10,13 +10,16 @@ After logging them, the experiences can be filter by date, location, medium, ...
 
 ## Technical info
 
-This rest backend project is a Maven project using Spring boot and persisting to a Mongo database.
+This rest backend project is a Maven project using Spring boot and persisting to a Postgres database.
 
 ### Prerequisits
 
-Application expects a mongod service running, i.e. "mongo" command is available and connects to database.
+#### database
 
-Mongod can be run by command "mongod –-dbpath <dbPath>"
+Application expects a postgres db running.
+Database parameters are specified in application.properties.
+
+default: local server on port 5432, database culturelog, user culturelog with password culturelog.
 
 ### Running the application
 
@@ -27,9 +30,6 @@ If the project is build via "mvm clean install", the jar can be run with its emb
 In both cases, the start REST url is http://localhost:8080/api . 
 The url can be configured by changing parameters "server.port" or "server.contextPath" in application.properties file 
 or add them as startup parameters ("java -jar culturelog-rest.jar --server.port=8081").
-
-The application will connect to or create a mongo database with name "culturelog". 
-This name can be configured by the property "spring.data.mongodb.database" in application.properties file.
 
 ### Security
 

@@ -56,7 +56,7 @@ public class CultureLogUserDetails implements UserDetails {
         return true;
     }
 
-    public String getUserId() {
+    public Long getUserId() {
         return user != null ? user.getId() : null;
     }
 }

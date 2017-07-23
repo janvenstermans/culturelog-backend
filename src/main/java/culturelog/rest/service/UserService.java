@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.validation.ConstraintViolationException;
+
 /**
  * @author Jan Venstermans
  */
@@ -30,7 +32,7 @@ public class UserService {
         return userRepository.findByUsername(userName);
     }
 
-    public User getById(String userId) {
+    public User getById(Long userId) {
         return userRepository.findOne(userId);
     }
 
@@ -47,7 +49,7 @@ public class UserService {
         if (getByUserName(username) != null) {
             throw new CultureLogException("Cannot create user: username allready in use");
         }
-        // check if username is email
+//        // check if username is email: is done also in entity, but this will give more ok
         if (!CultureLogUtils.isEmail(username)) {
             throw new CultureLogException("Cannot create user: username must be email");
         }
@@ -56,7 +58,12 @@ public class UserService {
         newUser.setUsername(username);
         newUser.setPassword(passwordEncoder.encode(password));
         newUser.setActive(true);
-        return userRepository.save(newUser);
+        try {
+            return userRepository.save(newUser);
+        } catch (ConstraintViolationException cve) {
+            //TODO: use well
+            throw new CultureLogException(cve.getMessage());
+        }
     }
 
     public UserDto toUserDto(User user) {

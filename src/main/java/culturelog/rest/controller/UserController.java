@@ -34,7 +34,7 @@ public class UserController {
     public ResponseEntity<?> registerUser(@RequestBody(required = true) UserCreateDto userCreateDto) {
         try {
             User newUser = userService.registerUser(userCreateDto);
-            return ResponseEntity.ok(userService.toUserDto(newUser));
+            return ResponseEntity.status(HttpStatus.CREATED).body(userService.toUserDto(newUser));
         } catch (CultureLogException e) {
             // maybe split it up, in different return codes
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e);

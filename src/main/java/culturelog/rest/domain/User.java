@@ -1,38 +1,47 @@
 package culturelog.rest.domain;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.hibernate.validator.constraints.Email;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 /**
  * @author Jan Venstermans
  */
-@Document(collection = "users")
+@Entity
+@Table(name = "users", schema = "culturelog")
 public class User {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    /**
-     * //TODO: required and unique
-     */
+    @NotNull
+    @Column(unique = true)
+    @Email
     private String username;
 
     /**
-     * TODO: required and encrypted.
+     * TODO: encrypted.
      */
+    @NotNull
     private String password;
 
     private boolean active;
 
-    public User() {}
+    public User() {
+    }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

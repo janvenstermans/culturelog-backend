@@ -6,7 +6,7 @@ package culturelog.rest.dto;
  */
 public class LocationDto {
 
-    private String id;
+    private Long id;
 
     private String description;
 
@@ -16,11 +16,11 @@ public class LocationDto {
 
     private double lng;
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

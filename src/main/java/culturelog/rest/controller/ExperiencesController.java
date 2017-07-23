@@ -54,7 +54,7 @@ public class ExperiencesController {
 
     @RequestMapping(value = "/{experienceId}", method = RequestMethod.GET)
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getExperience(@PathVariable(value="experienceId", required = true) String experienceId) {
+    public ResponseEntity<?> getExperience(@PathVariable(value="experienceId", required = true) Long experienceId) {
         String username = securityService.getLoggedInUsername();
         Experience experience = experienceService.getById(experienceId);
         if (experience != null && experience.getUsername().equals(username)) {
@@ -65,7 +65,7 @@ public class ExperiencesController {
 
     @RequestMapping(value = "/{experienceId}", method = RequestMethod.PUT)
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> updateExperience(@PathVariable(value="experienceId", required = true) String experienceId,
+    public ResponseEntity<?> updateExperience(@PathVariable(value="experienceId", required = true) Long experienceId,
                                               @RequestBody(required = true) Experience experience) {
         String username = securityService.getLoggedInUsername();
         Experience existingExperience = experienceService.getById(experienceId);

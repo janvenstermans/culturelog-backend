@@ -1,5 +1,6 @@
 package culturelog.rest.security;
 
+import culturelog.rest.domain.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,7 +25,15 @@ public class CultureLogSecurityService {
         return null;
     }
 
-    public String getLoggedInUserId() {
+    public User getLoggedInUser() {
+        CultureLogUserDetails userDetails = getLoggedInCultureLogUserDetails();
+        if (userDetails != null) {
+            return userDetails.getUser();
+        }
+        return null;
+    }
+
+    public Long getLoggedInUserId() {
         CultureLogUserDetails userDetails = getLoggedInCultureLogUserDetails();
         if (userDetails != null) {
             return userDetails.getUserId();

@@ -1,21 +1,29 @@
 package culturelog.rest.domain;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author Jan Venstermans
  */
-@Document(collection = "locations")
+@Entity
+@Table(name = "locations", schema = "culturelog")
 public class Location {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     /**
      * Description or title of the location.
-     * Required.
      */
+    @NotNull
     private String description;
 
     /**
@@ -33,13 +41,16 @@ public class Location {
      */
     private double lng;
 
-    private String userId;
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "userId")
+    private User user;
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -75,12 +86,12 @@ public class Location {
         this.lng = lng;
     }
 
-    public String getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     @Override

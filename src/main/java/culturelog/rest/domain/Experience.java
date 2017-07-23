@@ -1,16 +1,22 @@
 package culturelog.rest.domain;
 
-import org.springframework.data.annotation.Id;
-
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.Date;
 
 /**
  * @author Jan Venstermans
  */
+@Entity
+@Table(name = "experiences", schema = "culturelog")
 public class Experience {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     /**
      * Name of the user that has created the experience.
@@ -33,11 +39,11 @@ public class Experience {
 
     private String comment;
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

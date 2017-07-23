@@ -1,15 +1,16 @@
 package culturelog.rest.repository;
 
 import culturelog.rest.domain.User;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
  * @author Jan Venstermans
  */
-public interface UserRepository extends MongoRepository<User, String> {
+public interface UserRepository extends JpaRepository<User, Long> {
 
     /**
      * Find user object by unique username.
+     *
      * @param username
      * @return
      */

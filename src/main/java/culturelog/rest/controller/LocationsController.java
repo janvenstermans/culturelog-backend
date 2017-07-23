@@ -1,15 +1,22 @@
 package culturelog.rest.controller;
 
 import culturelog.rest.domain.Location;
+import culturelog.rest.domain.User;
 import culturelog.rest.dto.LocationDto;
 import culturelog.rest.exception.CultureLogException;
 import culturelog.rest.security.CultureLogSecurityService;
 import culturelog.rest.service.LocationService;
 import culturelog.rest.utils.LocationUtils;
+import culturelog.rest.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -33,10 +40,10 @@ public class LocationsController {
         if (location.getId() != null) {
             return ResponseEntity.badRequest().body("Cannot create location with id ");
         }
-        location.setUserId(securityService.getLoggedInUserId());
+        location.setUser(securityService.getLoggedInUser());
         try {
             Location newLocation = locationService.save(location);
-            return ResponseEntity.ok(LocationUtils.toLocationDto(newLocation));
+            return ResponseEntity.status(HttpStatus.CREATED).body(LocationUtils.toLocationDto(newLocation));
         } catch (CultureLogException e) {
             return ResponseEntity.badRequest().body(e);
         }
@@ -46,7 +53,7 @@ public class LocationsController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getLocationsOfUser() {
         try {
-            String userId = securityService.getLoggedInUserId();
+            Long userId = securityService.getLoggedInUserId();
             List<Location> locationList = locationService.getLocationsOfUserByUserId(userId);
             return ResponseEntity.ok(LocationUtils.toLocationDtoList(locationList));
 //        } catch (CultureLogException e) {
@@ -57,10 +64,10 @@ public class LocationsController {
 
     @RequestMapping(value = "/{locationId}", method = RequestMethod.GET)
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getLocation(@PathVariable(value="locationId", required = true) String locationId) {
-        String userId = securityService.getLoggedInUserId();
+    public ResponseEntity<?> getLocation(@PathVariable(value="locationId", required = true) Long locationId) {
+        User user = securityService.getLoggedInUser();
         Location location = locationService.getById(locationId);
-        if (location != null && location.getUserId().equals(userId)) {
+        if (location != null && UserUtils.areUsersSame(location.getUser(), user)) {
             return ResponseEntity.ok(LocationUtils.toLocationDto(location));
         }
         return ResponseEntity.badRequest().body("Cannot find location with id " + locationId);
@@ -68,16 +75,16 @@ public class LocationsController {
 
     @RequestMapping(value = "/{locationId}", method = RequestMethod.PUT)
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> updateLocation(@PathVariable(value="locationId", required = true) String locationId,
+    public ResponseEntity<?> updateLocation(@PathVariable(value="locationId", required = true) Long locationId,
                                               @RequestBody(required = true) LocationDto locationDto) {
         Location location = LocationUtils.fromLocationDto(locationDto);
-        String userId = securityService.getLoggedInUserId();
+        User user = securityService.getLoggedInUser();
         Location existingLocation = locationService.getById(locationId);
-        if (existingLocation == null || !existingLocation.getUserId().equals(userId)) {
+        if (existingLocation == null || !UserUtils.areUsersSame(location.getUser(), user)) {
             return ResponseEntity.badRequest().body("Cannot update location with id " + locationId);
         }
         location.setId(locationId);
-        location.setUserId(userId);
+        location.setUser(user);
         try {
             Location updatedLocation = locationService.save(location);
             return ResponseEntity.ok(LocationUtils.toLocationDto(updatedLocation));

@@ -27,7 +27,7 @@ public class ExperienceService {
         return experienceRepository.findByUsername(username);
     }
 
-    public Experience getById(String experienceId) {
+    public Experience getById(Long experienceId) {
         return experienceRepository.findOne(experienceId);
     }
 
