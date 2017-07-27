@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * @author Jan Venstermans
  */
-public interface ExperienceRepository extends JpaRepository<Experience, Long> {
+public interface ExperienceRepository /*extends JpaRepository<Experience, Long>*/ {
 
     /**
      * Find all experiences of o a user

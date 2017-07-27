@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
  * @author Jan Venstermans
  */
 @Entity
-@Table(name = "locations", schema = "culturelog")
+@Table(name = "location", schema = "culturelog")
 public class Location {
 
     @Id
@@ -29,17 +29,17 @@ public class Location {
     /**
      * optional
      */
-    private String address;
+//    private String address;
 
     /**
      * optional
      */
-    private double lat;
+//    private double lat;
 
     /**
      * optional
      */
-    private double lng;
+//    private double lng;
 
     @NotNull
     @ManyToOne
@@ -62,29 +62,29 @@ public class Location {
         this.description = description;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public double getLat() {
-        return lat;
-    }
-
-    public void setLat(double lat) {
-        this.lat = lat;
-    }
-
-    public double getLng() {
-        return lng;
-    }
-
-    public void setLng(double lng) {
-        this.lng = lng;
-    }
+//    public String getAddress() {
+//        return address;
+//    }
+//
+//    public void setAddress(String address) {
+//        this.address = address;
+//    }
+//
+//    public double getLat() {
+//        return lat;
+//    }
+//
+//    public void setLat(double lat) {
+//        this.lat = lat;
+//    }
+//
+//    public double getLng() {
+//        return lng;
+//    }
+//
+//    public void setLng(double lng) {
+//        this.lng = lng;
+//    }
 
     public User getUser() {
         return user;
@@ -97,7 +97,8 @@ public class Location {
     @Override
     public String toString() {
         return String.format(
-                "Location[id=%s, description='%s', address='%s', lat='%s', lng='%s']",
-                id, description, address, lat, lng);
+//                "Location[id=%s, description='%s', address='%s', lat='%s', lng='%s']",
+                "Location[id=%s, description='%s']",
+                id, description);
     }
 }

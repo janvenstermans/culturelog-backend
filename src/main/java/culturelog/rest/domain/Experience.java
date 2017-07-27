@@ -10,12 +10,12 @@ import java.util.Date;
 /**
  * @author Jan Venstermans
  */
-@Entity
-@Table(name = "experiences", schema = "culturelog")
+//@Entity
+//@Table(name = "experiences")
 public class Experience {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**

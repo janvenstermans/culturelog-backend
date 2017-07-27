@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
  * @author Jan Venstermans
  */
 @Entity
-@Table(name = "users", schema = "culturelog")
+@Table(name = "user", schema = "culturelog")
 public class User {
 
     @Id
@@ -26,9 +26,6 @@ public class User {
     @Email
     private String username;
 
-    /**
-     * TODO: encrypted.
-     */
     @NotNull
     private String password;
 

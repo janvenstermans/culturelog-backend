@@ -12,24 +12,24 @@ import java.util.List;
 /**
  * @author Jan Venstermans
  */
-@Service
+//@Service
 public class ExperienceService {
 
-    @Autowired
+//    @Autowired
     private ExperienceRepository experienceRepository;
 
-    public Experience save(Experience experience) throws CultureLogException {
-        checkRequiredFieldsForSave(experience);
-        return experienceRepository.save(experience);
-    }
-
-    public List<Experience> getExperiencesOfUser(String username) {
-        return experienceRepository.findByUsername(username);
-    }
-
-    public Experience getById(Long experienceId) {
-        return experienceRepository.findOne(experienceId);
-    }
+//    public Experience save(Experience experience) throws CultureLogException {
+//        checkRequiredFieldsForSave(experience);
+//        return experienceRepository.save(experience);
+//    }
+//
+//    public List<Experience> getExperiencesOfUser(String username) {
+//        return experienceRepository.findByUsername(username);
+//    }
+//
+//    public Experience getById(Long experienceId) {
+//        return experienceRepository.findOne(experienceId);
+//    }
 
     private void checkRequiredFieldsForSave(Experience experience) throws CultureLogException {
         if (experience == null) {

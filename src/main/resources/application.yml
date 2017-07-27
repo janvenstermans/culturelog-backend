@@ -1,0 +1,23 @@
+server:
+  port: 8080
+  contextPath: /api
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/culturelog
+    username: culturelog
+    password: culturelog
+    schema: culturelog
+  jpa:
+    properties:
+      hibernate:
+#        default_schema: culturelog
+        dialect: org.hibernate.dialect.PostgreSQL94Dialect
+#        hbm2ddl:
+#          auto: create
+
+flyway:
+  url: ${spring.datasource.url}
+  user: ${spring.datasource.username}
+  password: ${spring.datasource.password}
+  schemas: ${spring.datasource.schema}
