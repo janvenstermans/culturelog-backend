@@ -1,6 +1,7 @@
 package culturelog.rest.controller;
 
 import culturelog.rest.CulturelogRestApplication;
+import culturelog.rest.domain.User;
 import culturelog.rest.dto.UserCreateDto;
 import culturelog.rest.repository.UserRepository;
 import org.junit.Before;
@@ -21,9 +22,19 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -69,17 +80,71 @@ public class UserControllerTest {
         this.mockMvc = webAppContextSetup(webApplicationContext).apply(springSecurity()).build();
     }
 
+    // users/register POST
+
     @Test
-    public void testRegisterUser() throws Exception {
+    public void testRegisterUser_userNameIsEmailAdress() throws Exception {
+        String userName = "a@b.cd";
+        String passwordNotEncoded = "password";
         UserCreateDto userCreateDto = new UserCreateDto();
-        userCreateDto.setUsername("a@b.cd");
-        userCreateDto.setPassword("password");
+        userCreateDto.setUsername(userName);
+        userCreateDto.setPassword(passwordNotEncoded);
 
         mockMvc.perform(post("/users/register")
                 .content(this.json(userCreateDto))
                 .contentType(contentType))
                 .andExpect(status().isCreated());
+
+        User user = userRepository.findByUsername(userName);
+        assertNotNull(user);
+        assertTrue(user.isActive());
+        assertNotEquals(passwordNotEncoded, user.getPassword());
     }
+
+    @Test
+    public void testRegisterUser_userNameIsNotEmailAdress() throws Exception {
+        String userName = "abcd";
+        String passwordNotEncoded = "password";
+        UserCreateDto userCreateDto = new UserCreateDto();
+        userCreateDto.setUsername(userName);
+        userCreateDto.setPassword(passwordNotEncoded);
+
+        mockMvc.perform(post("/users/register")
+                .content(this.json(userCreateDto))
+                .contentType(contentType))
+                .andExpect(status().is4xxClientError());
+
+        User user = userRepository.findByUsername(userName);
+        assertNull(user);
+    }
+
+    @Test
+    public void testRegisterUser_methodNotAllowed() throws Exception {
+        UserCreateDto dummy = new UserCreateDto();
+
+        mockMvc.perform(get("/users/register"))
+                .andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(head("/users/register"))
+                .andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(put("/users/register")
+                .content(this.json(dummy))
+                .contentType(contentType))
+                .andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(patch("/users/register")
+                .content(this.json(dummy))
+                .contentType(contentType))
+                .andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(delete("/users/register"))
+                .andExpect(status().isMethodNotAllowed());
+
+        //OPTIONS
+        //TODO: make options header check more general, for multiple methods (order not important).
+        mockMvc.perform(options("/users/register"))
+                .andExpect(status().isOk())
+                .andExpect(header().string(ControllerTestUtils.ALLOW_HEADER, "POST"));
+    }
+
+    // helper methods
 
     protected String json(Object o) throws IOException {
         MockHttpOutputMessage mockHttpOutputMessage = new MockHttpOutputMessage();

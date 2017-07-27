@@ -1,11 +1,12 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:culturelog
+    url: jdbc:h2:mem:culturelog;INIT=RUNSCRIPT FROM 'classpath:sql/createH2.sql'
     username: culturelog
     password: culturelog
+    schema: culturelog
     driver-class-name: org.h2.Driver
   jpa:
     properties:
       hibernate:
-#        default_schema: culturelog
+        default_schema: ${spring.datasource.schema}
         dialect: org.hibernate.dialect.H2Dialect
