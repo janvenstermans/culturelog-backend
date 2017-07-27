@@ -11,7 +11,7 @@ spring:
   jpa:
     properties:
       hibernate:
-#        default_schema: culturelog
+        default_schema: ${spring.datasource.schema}
         dialect: org.hibernate.dialect.PostgreSQL94Dialect
 #        hbm2ddl:
 #          auto: create

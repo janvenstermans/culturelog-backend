@@ -7,13 +7,16 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 /**
  * @author Jan Venstermans
  */
 @Entity
-@Table(name = "location", schema = "culturelog")
+@Table(name = "location", uniqueConstraints = {
+    @UniqueConstraint(name = "location_nameUser_unique", columnNames = {"name", "userId"})
+})
 public class Location {
 
     @Id
@@ -21,9 +24,14 @@ public class Location {
     private Long id;
 
     /**
-     * Description or title of the location.
+     * Name of the location. Is used as a key.
      */
     @NotNull
+    private String name;
+
+    /**
+     * Description or title of the location.
+     */
     private String description;
 
     /**
@@ -52,6 +60,14 @@ public class Location {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {

@@ -8,6 +8,8 @@ public class LocationDto {
 
     private Long id;
 
+    private String name;
+
     private String description;
 
 //    private String address;
@@ -22,6 +24,14 @@ public class LocationDto {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {
@@ -59,8 +69,8 @@ public class LocationDto {
     @Override
     public String toString() {
         return String.format(
-                "Location[id=%s, description='%s']",
-//                "Location[id=%s, description='%s', address='%s', lat='%s', lng='%s']",
-                id, description);
+                "Location[id=%s, name='%s', description='%s']",
+//                "Location[id=%s, name='%s', description='%s', address='%s', lat='%s', lng='%s']",
+                id, name, description);
     }
 }

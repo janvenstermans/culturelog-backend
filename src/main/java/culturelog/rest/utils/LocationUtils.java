@@ -30,6 +30,7 @@ public class LocationUtils {
         }
         LocationDto locationDto = new LocationDto();
         locationDto.setId(location.getId());
+        locationDto.setName(location.getName());
         locationDto.setDescription(location.getDescription());
 //        locationDto.setAddress(location.getAddress());
 //        locationDto.setLat(location.getLat());
@@ -43,7 +44,8 @@ public class LocationUtils {
         }
         Location location = new Location();
         location.setId(locationDto.getId());
-            location.setDescription(locationDto.getDescription());
+        location.setName(locationDto.getName());
+        location.setDescription(locationDto.getDescription());
 //        location.setAddress(locationDto.getAddress());
 //        location.setLat(locationDto.getLat());
 //        location.setLng(locationDto.getLng());
