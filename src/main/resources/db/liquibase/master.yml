@@ -1,0 +1,10 @@
+databaseChangeLog:
+   - include:
+      file: classpath:db/liquibase/changelog/1_setup.yml
+      relativeToChangelogFile: false
+   - include:
+      file: classpath:db/liquibase/changelog/2_createEntity_user.yml
+      relativeToChangelogFile: false
+   - include:
+      file: classpath:db/liquibase/changelog/3_createEntity_location.yml
+      relativeToChangelogFile: false

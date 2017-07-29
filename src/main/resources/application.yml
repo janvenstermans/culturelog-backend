@@ -9,6 +9,9 @@ spring:
     password: culturelog
     schema: culturelog
   jpa:
+    hibernate:
+#    avoid actions on db via hibernate, will be done via liquibase
+      ddl-auto: none
     properties:
       hibernate:
         default_schema: ${spring.datasource.schema}
@@ -16,8 +19,7 @@ spring:
 #        hbm2ddl:
 #          auto: create
 
-flyway:
-  url: ${spring.datasource.url}
-  user: ${spring.datasource.username}
-  password: ${spring.datasource.password}
-  schemas: ${spring.datasource.schema}
+liquibase:
+  change-log: classpath:db/liquibase/master.yml
+#  defaultSchema: where liquibase tables are, needed to create schema culturelog
+  defaultSchema: public

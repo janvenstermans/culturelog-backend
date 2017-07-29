@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: janvenstermans
+      changes:
+        - sqlFile:
+            path: classpath:db/liquibase/sql/1_createSchema_culturelog.sql
+            encoding: utf8
+            relativeToChangelogFile: false

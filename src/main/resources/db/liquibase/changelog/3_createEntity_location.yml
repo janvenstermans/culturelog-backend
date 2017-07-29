@@ -1,0 +1,44 @@
+databaseChangeLog:
+  - changeSet:
+      id: 3
+      author: janvenstermans
+      changes:
+        - createTable:
+            tableName: location
+            schemaName: culturelog
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(1000)
+              - column:
+                  name: user_id
+                  type: int
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: location
+            baseTableSchemaName: culturelog
+            constraintName: fk_location_user
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: user
+            referencedTableSchemaName: culturelog
+        - addUniqueConstraint:
+            columnNames: name,user_id
+            constraintName: location_nameUser_unique
+            tableName: location
+            schemaName: culturelog
