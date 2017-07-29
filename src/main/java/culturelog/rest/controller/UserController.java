@@ -46,20 +46,20 @@ public class UserController {
      * @param userDto change the user info (limited info can be changed)
      * @return
      */
-    @RequestMapping(value = "/update", method = RequestMethod.PUT)
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> updateUser(@RequestBody(required = true) UserDto userDto) {
-       throw new UnsupportedOperationException();
-    }
+//    @RequestMapping(value = "/update", method = RequestMethod.PUT)
+//    @PreAuthorize("isAuthenticated()")
+//    public ResponseEntity<?> updateUser(@RequestBody(required = true) UserDto userDto) {
+//       throw new UnsupportedOperationException();
+//    }
 
     /**
      *  Changing password of logged in user.
      * @param userCreateDto should contain username and password
      * @return
      */
-    @RequestMapping(value = "/changePassword", method = RequestMethod.PUT)
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> changePassword(@RequestBody(required = true) UserCreateDto userCreateDto) {
-       throw new UnsupportedOperationException();
-    }
+//    @RequestMapping(value = "/changePassword", method = RequestMethod.PUT)
+//    @PreAuthorize("isAuthenticated()")
+//    public ResponseEntity<?> changePassword(@RequestBody(required = true) UserCreateDto userCreateDto) {
+//       throw new UnsupportedOperationException();
+//    }
 }
