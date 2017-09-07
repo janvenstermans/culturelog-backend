@@ -1,5 +1,6 @@
 package culturelog.rest.configuration;
 
+import culturelog.rest.domain.User;
 import culturelog.rest.dto.UserCreateDto;
 import culturelog.rest.exception.CultureLogException;
 import culturelog.rest.service.UserService;
@@ -19,13 +20,18 @@ public class CultureLogTestConfiguration {
 
     public static final String USER1 = "a@b.cd";
     public static final String USER1_PASS = "password";
+    private static Long USER1_ID;
 
     @PostConstruct
     protected void fillDbWithTestData() throws CultureLogException {
         UserCreateDto userCreateDto = new UserCreateDto();
         userCreateDto.setUsername(USER1);
         userCreateDto.setPassword(USER1_PASS);
-        userService.registerUser(userCreateDto);
+        User user = userService.registerUser(userCreateDto);
+        USER1_ID = user.getId();
     }
 
+    public static Long getUser1Id() {
+        return USER1_ID;
+    }
 }

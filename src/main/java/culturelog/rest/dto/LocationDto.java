@@ -69,7 +69,7 @@ public class LocationDto {
     @Override
     public String toString() {
         return String.format(
-                "Location[id=%s, name='%s', description='%s']",
+                "LocationDto[id=%s, name='%s', description='%s']",
 //                "Location[id=%s, name='%s', description='%s', address='%s', lat='%s', lng='%s']",
                 id, name, description);
     }

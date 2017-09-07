@@ -14,42 +14,26 @@ import javax.validation.constraints.NotNull;
  * @author Jan Venstermans
  */
 @Entity
-@Table(name = "location", uniqueConstraints = {
-    @UniqueConstraint(name = "location_nameUser_unique", columnNames = {"name", "userId"})
+@Table(name = "medium", uniqueConstraints = {
+    @UniqueConstraint(name = "medium_nameUser_unique", columnNames = {"name", "userId"})
 })
-public class Location {
+public class Medium {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
-     * Name of the location. Is used as a key.
+     * Name of the medium. Is used as a key.
      */
     @NotNull
     private String name;
 
     /**
-     * Description or title of the location.
+     * Description or title of the medium.
      */
     private String description;
 
-    /**
-     * optional
-     */
-//    private String address;
-
-    /**
-     * optional
-     */
-//    private double lat;
-
-    /**
-     * optional
-     */
-//    private double lng;
-
-    @NotNull
     @ManyToOne
     @JoinColumn(name = "userId")
     private User user;
@@ -78,30 +62,6 @@ public class Location {
         this.description = description;
     }
 
-//    public String getAddress() {
-//        return address;
-//    }
-//
-//    public void setAddress(String address) {
-//        this.address = address;
-//    }
-//
-//    public double getLat() {
-//        return lat;
-//    }
-//
-//    public void setLat(double lat) {
-//        this.lat = lat;
-//    }
-//
-//    public double getLng() {
-//        return lng;
-//    }
-//
-//    public void setLng(double lng) {
-//        this.lng = lng;
-//    }
-
     public User getUser() {
         return user;
     }
@@ -113,8 +73,7 @@ public class Location {
     @Override
     public String toString() {
         return String.format(
-//                "Location[id=%s, name='%s', description='%s', address='%s', lat='%s', lng='%s']",
-                "Location[id=%s, name='%s', description='%s']",
-                id, name, description);
+                "Medium[id=%s, name='%s', description='%s', global='%s']",
+                id, name, description, user == null);
     }
 }

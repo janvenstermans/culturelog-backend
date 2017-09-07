@@ -2,10 +2,11 @@ package culturelog.rest.controller;
 
 import culturelog.rest.CulturelogRestApplication;
 import culturelog.rest.configuration.CultureLogTestConfiguration;
-import culturelog.rest.domain.User;
+import culturelog.rest.domain.Location;
 import culturelog.rest.dto.LocationDto;
 import culturelog.rest.repository.LocationRepository;
 import culturelog.rest.repository.UserRepository;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+
+import java.util.List;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -46,7 +49,10 @@ public class LocationControllerTest extends ControllerTestAbstract {
     // url /locations POST
 
     @Test
-    public void testCreateLocation_nameUnused() throws Exception {
+    public void testCreateLocation_nameNew() throws Exception {
+        List<Location> locationListBefore = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        Assert.assertEquals(0, locationListBefore.size());
+
         String locatieName = "locatieName1";
         LocationDto locationDto = new LocationDto();
         locationDto.setName(locatieName);
@@ -57,11 +63,10 @@ public class LocationControllerTest extends ControllerTestAbstract {
                 .contentType(contentType))
                 .andExpect(status().isCreated());
 
-        User user = userRepository.findByUsername(CultureLogTestConfiguration.USER1);
-//        assertNotNull(user);
-//        assertTrue(user.isActive());
-//        assertNotEquals(passwordNotEncoded, user.getPassword());
-        // TODO: test location in db
+        List<Location> locationList = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        Assert.assertEquals(1, locationList.size());
+        Location locationSaved = locationList.get(0);
+        Assert.assertEquals(locatieName, locationSaved.getName());
     }
 
     //TODO: test

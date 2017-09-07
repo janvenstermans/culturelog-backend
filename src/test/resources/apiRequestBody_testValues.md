@@ -13,3 +13,9 @@ POST api/locations
 ```json
 {"name":"thuis"}
 ```
+# create medium
+POST api/media
+
+```json
+{"name":"film"}
+```

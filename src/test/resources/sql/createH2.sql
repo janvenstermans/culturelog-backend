@@ -1,1 +1,1 @@
-CREATE SCHEMA IF NOT EXISTS culturelog;
+--CREATE SCHEMA IF NOT EXISTS culturelog;

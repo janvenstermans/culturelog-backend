@@ -2,10 +2,9 @@ package culturelog.rest.controller;
 
 import org.junit.Assert;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -17,10 +16,12 @@ import java.util.List;
 public class ControllerTestUtils {
 
     // don't check because result of OPTIONS call or extension of other.
-    private static List<HttpMethod> httpMethodnoCheckList = Arrays.asList(HttpMethod.OPTIONS, HttpMethod.HEAD, HttpMethod.PATCH);
-    private static List<HttpMethod> httpMethodListToCheck = Arrays.asList(HttpMethod.values());
+    private static final List<HttpMethod> httpMethodnoCheckList;
+    private static final List<HttpMethod> httpMethodListToCheck;
 
     static {
+        httpMethodnoCheckList = Arrays.asList(HttpMethod.OPTIONS, HttpMethod.HEAD, HttpMethod.PATCH);
+        httpMethodListToCheck = new ArrayList<HttpMethod>(Arrays.asList(HttpMethod.values()));
         httpMethodListToCheck.removeAll(httpMethodnoCheckList);
     }
 

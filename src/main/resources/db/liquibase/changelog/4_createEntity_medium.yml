@@ -1,0 +1,42 @@
+databaseChangeLog:
+  - changeSet:
+      id: 3
+      author: janvenstermans
+      changes:
+        - createTable:
+            tableName: medium
+            schemaName: culturelog
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(1000)
+              - column:
+                  name: user_id
+                  type: int
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: medium
+            baseTableSchemaName: culturelog
+            constraintName: fk_medium_user
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: user
+            referencedTableSchemaName: culturelog
+        - addUniqueConstraint:
+            columnNames: name,user_id
+            constraintName: medium_nameUser_unique
+            tableName: medium
+            schemaName: culturelog

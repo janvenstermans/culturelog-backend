@@ -1,3 +1,7 @@
+server:
+  port: 8080
+  contextPath: /api
+
 spring:
   datasource:
     url: jdbc:h2:mem:culturelog;INIT=RUNSCRIPT FROM 'classpath:sql/createH2.sql'
@@ -10,3 +14,8 @@ spring:
       hibernate:
         default_schema: ${spring.datasource.schema}
         dialect: org.hibernate.dialect.H2Dialect
+
+liquibase:
+  change-log: classpath:db/liquibase/master.yml
+#  defaultSchema: where liquibase tables are, needed to create schema culturelog
+  defaultSchema: public
