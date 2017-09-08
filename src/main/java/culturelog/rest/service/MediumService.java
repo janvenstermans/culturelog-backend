@@ -19,6 +19,9 @@ public class MediumService {
     private MediumRepository mediumRepository;
 
     public Medium save(Medium medium) throws CultureLogException {
+        if (medium.getName() == null) {
+            throw new CultureLogException("Medium needs a name attribute");
+        }
         //check user-Naam combination
         Long userId = medium.getUser() != null ? medium.getUser().getId() : null;
         Optional<Medium> existing = mediumRepository.findByUserIdAndName(userId, medium.getName());
@@ -29,6 +32,9 @@ public class MediumService {
     }
 
     public List<Medium> getMediaOfUserByUserId(Long userId, boolean includeGeneral) {
+        if (includeGeneral) {
+            return mediumRepository.findByUserIdIncludingGlobal(userId);
+        }
         return mediumRepository.findByUserId(userId);
     }
 
