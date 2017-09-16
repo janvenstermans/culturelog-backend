@@ -68,7 +68,7 @@ public class MediumController {
     public ResponseEntity<?> getMedium(@PathVariable(value="mediumId", required = true) Long mediumId) {
         User user = securityService.getLoggedInUser();
         Medium medium = mediumService.getById(mediumId);
-        if (medium != null && UserUtils.areUsersSame(medium.getUser(), user)) {
+        if (medium != null && MediumUtils.isMediumOfUser(medium, user, true)) {
             return ResponseEntity.ok(MediumUtils.toMediumDto(medium));
         }
         return ResponseEntity.badRequest().body("Cannot find medium with id " + mediumId);
@@ -81,7 +81,7 @@ public class MediumController {
         Medium medium = MediumUtils.fromMediumDto(mediumDto);
         User user = securityService.getLoggedInUser();
         Medium existingMedium = mediumService.getById(mediumId);
-        if (existingMedium == null || !UserUtils.areUsersSame(medium.getUser(), user)) {
+        if (existingMedium == null || !UserUtils.areUsersSame(existingMedium.getUser(), user)) {
             return ResponseEntity.badRequest().body("Cannot update medium with id " + mediumId);
         }
         medium.setId(mediumId);

@@ -2,6 +2,7 @@ package culturelog.rest.utils;
 
 
 import culturelog.rest.domain.Medium;
+import culturelog.rest.domain.User;
 import culturelog.rest.dto.MediumDto;
 
 import java.util.Collections;
@@ -15,6 +16,20 @@ import java.util.stream.Collectors;
 public class MediumUtils {
 
     private MediumUtils() {
+    }
+
+    public static boolean isMediumOfUser(Medium medium, User user, boolean includeGlobal) {
+        if (medium == null) {
+            throw new IllegalArgumentException("medium cannot be null");
+        }
+        if (includeGlobal && isGlobal(medium)) {
+            return true;
+        }
+        return UserUtils.areUsersSame(medium.getUser(), user);
+    }
+
+    public static boolean isGlobal(Medium medium) {
+        return medium.getUser() == null;
     }
 
     public static List<MediumDto> toMediumDtoList(List<Medium> mediumList) {
