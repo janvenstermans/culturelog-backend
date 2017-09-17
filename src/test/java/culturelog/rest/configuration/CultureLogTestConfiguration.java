@@ -1,9 +1,10 @@
 package culturelog.rest.configuration;
 
+import culturelog.rest.domain.Location;
 import culturelog.rest.domain.Medium;
-import culturelog.rest.domain.User;
 import culturelog.rest.dto.UserCreateDto;
 import culturelog.rest.exception.CultureLogException;
+import culturelog.rest.service.LocationService;
 import culturelog.rest.service.MediumService;
 import culturelog.rest.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,9 @@ public class CultureLogTestConfiguration {
     @Autowired
     private MediumService mediumService;
 
+    @Autowired
+    private LocationService locationService;
+
     public static final String USER1 = "a@b.cd";
     public static final String USER1_PASS = "password";
     private static Long USER1_ID;
@@ -36,10 +40,16 @@ public class CultureLogTestConfiguration {
     private static Long GLOBAL_MEDIUM_ID_FILM;
     private static Long GLOBAL_MEDIUM_ID_BOOK;
 
+    public static final String GLOBAL_LOCATION_NAME_KINEPOLIS_GENT = "Kinepolis Gent";
+    public static final String GLOBAL_LOCATION_NAME_VOORUIT = "Vooruit";
+    private static Long GLOBAL_LOCATION_ID_KINEPOLIS_GENT;
+    private static Long GLOBAL_LOCATION_ID_VOORUIT;
+
     @PostConstruct
     protected void fillDbWithTestData() throws CultureLogException {
         addUsers();
         addGlobalMedia();
+        addGlobalLocations();
     }
 
     public static Long getUser1Id() {
@@ -56,6 +66,14 @@ public class CultureLogTestConfiguration {
 
     public static Long getGlobalMediumIdBook() {
         return GLOBAL_MEDIUM_ID_BOOK;
+    }
+
+    public static Long getGlobalLocationIdKinepolis() {
+        return GLOBAL_LOCATION_ID_KINEPOLIS_GENT;
+    }
+
+    public static Long getGlobalLocationIdVooruit() {
+        return GLOBAL_LOCATION_ID_VOORUIT;
     }
 
     private void addUsers() throws CultureLogException {
@@ -77,6 +95,15 @@ public class CultureLogTestConfiguration {
         Medium mediumBook = new Medium();
         mediumBook.setName(GLOBAL_MEDIUM_NAME_BOOK);
         GLOBAL_MEDIUM_ID_BOOK = mediumService.save(mediumBook).getId();
+    }
+
+    private void addGlobalLocations() throws CultureLogException {
+        Location locationKinepolisGent = new Location();
+        locationKinepolisGent.setName(GLOBAL_LOCATION_NAME_KINEPOLIS_GENT);
+        GLOBAL_LOCATION_ID_KINEPOLIS_GENT = locationService.save(locationKinepolisGent).getId();
+        Location locationVooruit = new Location();
+        locationVooruit.setName(GLOBAL_LOCATION_NAME_VOORUIT);
+        GLOBAL_LOCATION_ID_VOORUIT = locationService.save(locationVooruit).getId();
     }
 
 }

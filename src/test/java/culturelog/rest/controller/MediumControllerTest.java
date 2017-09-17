@@ -471,14 +471,6 @@ public class MediumControllerTest extends ControllerTestAbstract {
         return medium;
     }
 
-    private void assertIdList(List<Long> expectedIdList, JSONArray jsonPathResult) {
-        Assert.assertEquals(expectedIdList.size(), jsonPathResult.size());
-        for (int i = 0; i < jsonPathResult.size(); i++) {
-            Number value = (Number) jsonPathResult.get(i);
-            Assert.assertTrue(expectedIdList.contains(value.longValue()));
-        }
-    }
-
     private void assertMedium(Medium medium, JSONArray jsonPathResult) {
         Assert.assertNotNull(medium);
         Assert.assertNotNull(jsonPathResult);

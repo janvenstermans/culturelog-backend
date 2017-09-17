@@ -54,7 +54,7 @@ public class LocationController {
     public ResponseEntity<?> getLocationsOfUser() {
         try {
             Long userId = securityService.getLoggedInUserId();
-            List<Location> locationList = locationService.getLocationsOfUserByUserId(userId);
+            List<Location> locationList = locationService.getLocationsOfUserByUserId(userId, true);
             return ResponseEntity.ok(LocationUtils.toLocationDtoList(locationList));
 //        } catch (CultureLogException e) {
         } catch (Exception e) {
@@ -67,7 +67,7 @@ public class LocationController {
     public ResponseEntity<?> getLocation(@PathVariable(value="locationId", required = true) Long locationId) {
         User user = securityService.getLoggedInUser();
         Location location = locationService.getById(locationId);
-        if (location != null && UserUtils.areUsersSame(location.getUser(), user)) {
+        if (location != null && LocationUtils.isLocationOfUser(location, user, true)) {
             return ResponseEntity.ok(LocationUtils.toLocationDto(location));
         }
         return ResponseEntity.badRequest().body("Cannot find location with id " + locationId);
@@ -80,7 +80,7 @@ public class LocationController {
         Location location = LocationUtils.fromLocationDto(locationDto);
         User user = securityService.getLoggedInUser();
         Location existingLocation = locationService.getById(locationId);
-        if (existingLocation == null || !UserUtils.areUsersSame(location.getUser(), user)) {
+        if (existingLocation == null || !UserUtils.areUsersSame(existingLocation.getUser(), user)) {
             return ResponseEntity.badRequest().body("Cannot update location with id " + locationId);
         }
         location.setId(locationId);

@@ -12,6 +12,8 @@ public class LocationDto {
 
     private String description;
 
+    private boolean global;
+
 //    private String address;
 //
 //    private double lat;
@@ -42,6 +44,14 @@ public class LocationDto {
         this.description = description;
     }
 
+    public boolean isGlobal() {
+        return global;
+    }
+
+    public void setGlobal(boolean global) {
+        this.global = global;
+    }
+
 //    public String getAddress() {
 //        return address;
 //    }
@@ -69,8 +79,8 @@ public class LocationDto {
     @Override
     public String toString() {
         return String.format(
-                "LocationDto[id=%s, name='%s', description='%s']",
-//                "Location[id=%s, name='%s', description='%s', address='%s', lat='%s', lng='%s']",
-                id, name, description);
+                "LocationDto[id=%s, name='%s', description='%s', global='%s']",
+//                "Location[id=%s, name='%s', description='%s', global='%s', address='%s', lat='%s', lng='%s']",
+                id, name, description, global);
     }
 }

@@ -49,7 +49,6 @@ public class Location {
      */
 //    private double lng;
 
-    @NotNull
     @ManyToOne
     @JoinColumn(name = "userId")
     private User user;

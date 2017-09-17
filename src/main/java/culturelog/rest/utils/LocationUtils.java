@@ -2,6 +2,7 @@ package culturelog.rest.utils;
 
 
 import culturelog.rest.domain.Location;
+import culturelog.rest.domain.User;
 import culturelog.rest.dto.LocationDto;
 
 import java.util.Collections;
@@ -15,6 +16,20 @@ import java.util.stream.Collectors;
 public class LocationUtils {
 
     private LocationUtils() {
+    }
+
+    public static boolean isLocationOfUser(Location location, User user, boolean includeGlobal) {
+        if (location == null) {
+            throw new IllegalArgumentException("location cannot be null");
+        }
+        if (includeGlobal && isGlobal(location)) {
+            return true;
+        }
+        return UserUtils.areUsersSame(location.getUser(), user);
+    }
+
+    public static boolean isGlobal(Location location) {
+        return location.getUser() == null;
     }
 
     public static List<LocationDto> toLocationDtoList(List<Location> locationList) {
@@ -32,6 +47,7 @@ public class LocationUtils {
         locationDto.setId(location.getId());
         locationDto.setName(location.getName());
         locationDto.setDescription(location.getDescription());
+        locationDto.setGlobal(location.getUser() == null);
 //        locationDto.setAddress(location.getAddress());
 //        locationDto.setLat(location.getLat());
 //        locationDto.setLng(location.getLng());

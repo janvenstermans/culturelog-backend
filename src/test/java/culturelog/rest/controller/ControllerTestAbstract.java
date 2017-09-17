@@ -1,5 +1,7 @@
 package culturelog.rest.controller;
 
+import net.minidev.json.JSONArray;
+import org.junit.Assert;
 import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -14,6 +16,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -72,5 +75,13 @@ public abstract class ControllerTestAbstract {
                 .andReturn();
 
         ControllerTestUtils.assertOptionsResult(mvcResult, expectedAllowed);
+    }
+
+    protected static void assertIdList(List<Long> expectedIdList, JSONArray jsonPathResult) {
+        Assert.assertEquals(expectedIdList.size(), jsonPathResult.size());
+        for (int i = 0; i < jsonPathResult.size(); i++) {
+            Number value = (Number) jsonPathResult.get(i);
+            Assert.assertTrue(expectedIdList.contains(value.longValue()));
+        }
     }
 }

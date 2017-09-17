@@ -11,3 +11,6 @@ databaseChangeLog:
    - include:
       file: classpath:db/liquibase/changelog/4_createEntity_medium.yml
       relativeToChangelogFile: false
+   - include:
+      file: classpath:db/liquibase/changelog/5_updateEntity_location_allowGlobal.yml
+      relativeToChangelogFile: false
