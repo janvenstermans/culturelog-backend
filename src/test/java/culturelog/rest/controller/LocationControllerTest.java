@@ -84,7 +84,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
         locationDto.setId(123L);
 
         mockMvc.perform(post(URL_LOCATIONS)
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(locationDto))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest());
@@ -101,7 +101,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
         LocationDto locationDto = new LocationDto();
 
         mockMvc.perform(post(URL_LOCATIONS)
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(locationDto))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest());
@@ -120,7 +120,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
         locationDto.setName(locationName);
 
         mockMvc.perform(post(URL_LOCATIONS)
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(locationDto))
                 .contentType(contentType))
                 .andExpect(status().isCreated());
@@ -141,13 +141,13 @@ public class LocationControllerTest extends ControllerTestAbstract {
         locationDto.setName(locationName);
 
         mockMvc.perform(post(URL_LOCATIONS)
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(locationDto))
                 .contentType(contentType))
                 .andExpect(status().isCreated());
 
         mockMvc.perform(post(URL_LOCATIONS)
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(locationDto))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest());
@@ -171,7 +171,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
         locationDto.setDescription(description);
 
         mockMvc.perform(post(URL_LOCATIONS)
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(locationDto))
                 .contentType(contentType))
                 .andExpect(status().isCreated())
@@ -201,7 +201,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
         Assert.assertEquals(1, locationRepository.findByName(locationName).size());
 
         mockMvc.perform(post(URL_LOCATIONS)
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(locationDto))
                 .contentType(contentType))
                 .andExpect(status().isCreated());
@@ -230,7 +230,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
         List<Long> expectedIdList = generalLocations.stream().map(location -> location.getId()).collect(Collectors.toList());
 
         MvcResult result = mockMvc.perform(get(URL_LOCATIONS)
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS)))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(expectedIdList.size())))
 //                .andDo(MockMvcResultHandlers.print())
@@ -256,7 +256,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
         List<Long> expectedIdList = Stream.concat(locationListUser.stream(), generalLocations.stream()).map(location -> location.getId()).collect(Collectors.toList());
 
         MvcResult result = mockMvc.perform(get(URL_LOCATIONS)
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS)))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(expectedIdList.size())))
 //                .andDo(MockMvcResultHandlers.print())
@@ -290,7 +290,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
         Long locationId = CultureLogTestConfiguration.getGlobalLocationIdVooruit();
 
         MvcResult result = mockMvc.perform(get(String.format(URL_LOCATIONS_ONE, locationId))
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS)))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -304,7 +304,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
         Long locationId = locationRepository.save(createLocationToSave("testOne", user1)).getId();
 
         MvcResult result = mockMvc.perform(get(String.format(URL_LOCATIONS_ONE, locationId))
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS)))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -318,7 +318,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
         Long locationId = locationRepository.save(createLocationToSave("testTwo", user2)).getId();
 
         mockMvc.perform(get(String.format(URL_LOCATIONS_ONE, locationId))
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS)))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -328,7 +328,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
         Assert.assertNull(locationRepository.findOne(locationId));
 
         mockMvc.perform(get(String.format(URL_LOCATIONS_ONE, locationId))
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS)))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -352,7 +352,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
         locationDto.setId(locationId);
 
         mockMvc.perform(put(String.format(URL_LOCATIONS_ONE, locationId))
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(locationDto))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest());
@@ -370,7 +370,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
         locationDto.setDescription((location1.getDescription() != null ? location1.getDescription() : "") + "Edited");
 
         MvcResult result = mockMvc.perform(put(String.format(URL_LOCATIONS_ONE, locationId))
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(locationDto))
                 .contentType(contentType))
                 .andExpect(status().isOk())
@@ -394,7 +394,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
         locationDto.setDescription((location1.getDescription() != null ? location1.getDescription() : "") + "Edited");
 
         MvcResult result = mockMvc.perform(put(String.format(URL_LOCATIONS_ONE, locationId))
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(locationDto))
                 .contentType(contentType))
                 .andExpect(status().isOk())
@@ -420,7 +420,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
         locationDto.setDescription((location1.getDescription() != null ? location1.getDescription() : "") + "Edited");
 
         mockMvc.perform(put(String.format(URL_LOCATIONS_ONE, locationId))
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(locationDto))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest());
@@ -441,7 +441,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
         locationDto.setId(locationId);
 
         mockMvc.perform(put(String.format(URL_LOCATIONS_ONE, locationId))
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(locationDto))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest());
@@ -456,7 +456,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
         locationDto.setId(locationId);
 
         mockMvc.perform(put(String.format(URL_LOCATIONS_ONE, locationId))
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(locationDto))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest());

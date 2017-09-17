@@ -27,11 +27,11 @@ public class CultureLogTestConfiguration {
     @Autowired
     private LocationService locationService;
 
-    public static final String USER1 = "a@b.cd";
+    public static final String USER1_NAME = "a@b.cd";
     public static final String USER1_PASS = "password";
     private static Long USER1_ID;
 
-    public static final String USER2 = "b@b.cd";
+    public static final String USER2_NAME = "b@b.cd";
     public static final String USER2_PASS = "password";
     private static Long USER2_ID;
 
@@ -78,12 +78,12 @@ public class CultureLogTestConfiguration {
 
     private void addUsers() throws CultureLogException {
         UserCreateDto user1CreateDto = new UserCreateDto();
-        user1CreateDto.setUsername(USER1);
+        user1CreateDto.setUsername(USER1_NAME);
         user1CreateDto.setPassword(USER1_PASS);
         USER1_ID = userService.registerUser(user1CreateDto).getId();
 
         UserCreateDto user2CreateDto = new UserCreateDto();
-        user2CreateDto.setUsername(USER2);
+        user2CreateDto.setUsername(USER2_NAME);
         user2CreateDto.setPassword(USER2_PASS);
         USER2_ID = userService.registerUser(user2CreateDto).getId();
     }

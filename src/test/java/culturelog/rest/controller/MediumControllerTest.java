@@ -84,7 +84,7 @@ public class MediumControllerTest extends ControllerTestAbstract {
         mediumDto.setId(123L);
 
         mockMvc.perform(post(URL_MEDIA)
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(mediumDto))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest());
@@ -101,7 +101,7 @@ public class MediumControllerTest extends ControllerTestAbstract {
         MediumDto mediumDto = new MediumDto();
 
         mockMvc.perform(post(URL_MEDIA)
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(mediumDto))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest());
@@ -120,7 +120,7 @@ public class MediumControllerTest extends ControllerTestAbstract {
         mediumDto.setName(mediumName);
 
         mockMvc.perform(post(URL_MEDIA)
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(mediumDto))
                 .contentType(contentType))
                 .andExpect(status().isCreated());
@@ -141,13 +141,13 @@ public class MediumControllerTest extends ControllerTestAbstract {
         mediumDto.setName(mediumName);
 
         mockMvc.perform(post(URL_MEDIA)
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(mediumDto))
                 .contentType(contentType))
                 .andExpect(status().isCreated());
 
         mockMvc.perform(post(URL_MEDIA)
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(mediumDto))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest());
@@ -171,7 +171,7 @@ public class MediumControllerTest extends ControllerTestAbstract {
         mediumDto.setDescription(description);
 
         mockMvc.perform(post(URL_MEDIA)
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(mediumDto))
                 .contentType(contentType))
                 .andExpect(status().isCreated())
@@ -201,7 +201,7 @@ public class MediumControllerTest extends ControllerTestAbstract {
         Assert.assertEquals(1, mediumRepository.findByName(mediumName).size());
 
         mockMvc.perform(post(URL_MEDIA)
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(mediumDto))
                 .contentType(contentType))
                 .andExpect(status().isCreated());
@@ -230,7 +230,7 @@ public class MediumControllerTest extends ControllerTestAbstract {
         List<Long> expectedIdList = generalMedia.stream().map(medium -> medium.getId()).collect(Collectors.toList());
 
         MvcResult result = mockMvc.perform(get(URL_MEDIA)
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS)))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(expectedIdList.size())))
 //                .andDo(MockMvcResultHandlers.print())
@@ -256,7 +256,7 @@ public class MediumControllerTest extends ControllerTestAbstract {
         List<Long> expectedIdList = Stream.concat(mediumListUser.stream(), generalMedia.stream()).map(medium -> medium.getId()).collect(Collectors.toList());
 
         MvcResult result = mockMvc.perform(get(URL_MEDIA)
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS)))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(expectedIdList.size())))
 //                .andDo(MockMvcResultHandlers.print())
@@ -290,7 +290,7 @@ public class MediumControllerTest extends ControllerTestAbstract {
         Long mediumId = CultureLogTestConfiguration.getGlobalMediumIdBook();
 
         MvcResult result = mockMvc.perform(get(String.format(URL_MEDIA_ONE, mediumId))
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS)))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -304,7 +304,7 @@ public class MediumControllerTest extends ControllerTestAbstract {
         Long mediumId = mediumRepository.save(createMediumToSave("testOne", user1)).getId();
 
         MvcResult result = mockMvc.perform(get(String.format(URL_MEDIA_ONE, mediumId))
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS)))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -318,7 +318,7 @@ public class MediumControllerTest extends ControllerTestAbstract {
         Long mediumId = mediumRepository.save(createMediumToSave("testTwo", user2)).getId();
 
         mockMvc.perform(get(String.format(URL_MEDIA_ONE, mediumId))
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS)))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -328,7 +328,7 @@ public class MediumControllerTest extends ControllerTestAbstract {
         Assert.assertNull(mediumRepository.findOne(mediumId));
 
         mockMvc.perform(get(String.format(URL_MEDIA_ONE, mediumId))
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS)))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -352,7 +352,7 @@ public class MediumControllerTest extends ControllerTestAbstract {
         mediumDto.setId(mediumId);
 
         mockMvc.perform(put(String.format(URL_MEDIA_ONE, mediumId))
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(mediumDto))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest());
@@ -370,7 +370,7 @@ public class MediumControllerTest extends ControllerTestAbstract {
         mediumDto.setDescription((medium1.getDescription() != null ? medium1.getDescription() : "") + "Edited");
 
         MvcResult result = mockMvc.perform(put(String.format(URL_MEDIA_ONE, mediumId))
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(mediumDto))
                 .contentType(contentType))
                 .andExpect(status().isOk())
@@ -394,7 +394,7 @@ public class MediumControllerTest extends ControllerTestAbstract {
         mediumDto.setDescription((medium1.getDescription() != null ? medium1.getDescription() : "") + "Edited");
 
         MvcResult result = mockMvc.perform(put(String.format(URL_MEDIA_ONE, mediumId))
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(mediumDto))
                 .contentType(contentType))
                 .andExpect(status().isOk())
@@ -420,7 +420,7 @@ public class MediumControllerTest extends ControllerTestAbstract {
         mediumDto.setDescription((medium1.getDescription() != null ? medium1.getDescription() : "") + "Edited");
 
         mockMvc.perform(put(String.format(URL_MEDIA_ONE, mediumId))
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(mediumDto))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest());
@@ -441,7 +441,7 @@ public class MediumControllerTest extends ControllerTestAbstract {
         mediumDto.setId(mediumId);
 
         mockMvc.perform(put(String.format(URL_MEDIA_ONE, mediumId))
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(mediumDto))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest());
@@ -456,7 +456,7 @@ public class MediumControllerTest extends ControllerTestAbstract {
         mediumDto.setId(mediumId);
 
         mockMvc.perform(put(String.format(URL_MEDIA_ONE, mediumId))
-                .with(httpBasic(CultureLogTestConfiguration.USER1, CultureLogTestConfiguration.USER1_PASS))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(mediumDto))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest());

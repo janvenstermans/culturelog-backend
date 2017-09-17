@@ -1,9 +1,11 @@
 package culturelog.rest.controller;
 
 import culturelog.rest.CulturelogRestApplication;
+import culturelog.rest.configuration.CultureLogTestConfiguration;
 import culturelog.rest.domain.User;
 import culturelog.rest.dto.UserCreateDto;
 import culturelog.rest.repository.UserRepository;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -32,7 +35,7 @@ public class UserControllerTest extends ControllerTestAbstract {
     @Autowired
     private UserRepository userRepository;
 
-    private static final String URL_USERS_REGISTER = "/users/register ";
+    private static final String URL_USERS_REGISTER = "/users/register";
 
     // users/register OPTIONS
 
@@ -44,12 +47,26 @@ public class UserControllerTest extends ControllerTestAbstract {
     // users/register POST
 
     @Test
+    public void testRegisterUser_userNameAlreadyExists() throws Exception {
+        String userName = CultureLogTestConfiguration.USER1_NAME;
+        String passwordNotEncoded = "password";
+        Assert.assertNotNull(userRepository.findByUsername(userName));
+
+        UserCreateDto userCreateDto = createUserCreateDto(userName, passwordNotEncoded);
+
+        mockMvc.perform(post(URL_USERS_REGISTER)
+                .content(this.json(userCreateDto))
+                .contentType(contentType))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     public void testRegisterUser_userNameIsEmailAdress() throws Exception {
         String userName = "abv@b.cd";
         String passwordNotEncoded = "password";
-        UserCreateDto userCreateDto = new UserCreateDto();
-        userCreateDto.setUsername(userName);
-        userCreateDto.setPassword(passwordNotEncoded);
+        assertNull(userRepository.findByUsername(userName));
+
+        UserCreateDto userCreateDto = createUserCreateDto(userName, passwordNotEncoded);
 
         mockMvc.perform(post(URL_USERS_REGISTER)
                 .content(this.json(userCreateDto))
@@ -66,20 +83,72 @@ public class UserControllerTest extends ControllerTestAbstract {
     public void testRegisterUser_userNameIsNotEmailAdress() throws Exception {
         String userName = "abcd";
         String passwordNotEncoded = "password";
-        UserCreateDto userCreateDto = new UserCreateDto();
-        userCreateDto.setUsername(userName);
-        userCreateDto.setPassword(passwordNotEncoded);
+        assertNull(userRepository.findByUsername(userName));
+
+        UserCreateDto userCreateDto = createUserCreateDto(userName, passwordNotEncoded);
 
         mockMvc.perform(post(URL_USERS_REGISTER)
                 .content(this.json(userCreateDto))
                 .contentType(contentType))
-                .andExpect(status().is4xxClientError());
+                .andExpect(status().isBadRequest());
 
-        User user = userRepository.findByUsername(userName);
-        assertNull(user);
+        assertNull(userRepository.findByUsername(userName));
     }
 
-    // TODO: create test
-    // username already exists
-    // not all info availale
+    @Test
+    public void testRegisterUser_dtoEmpty() throws Exception {
+        String userName = null;
+        String passwordNotEncoded = null;
+        assertNull(userRepository.findByUsername(userName));
+
+        UserCreateDto userCreateDto = createUserCreateDto(userName, passwordNotEncoded);
+
+        mockMvc.perform(post(URL_USERS_REGISTER)
+                .content(this.json(userCreateDto))
+                .contentType(contentType))
+                .andExpect(status().isBadRequest());
+
+        assertNull(userRepository.findByUsername(userName));
+    }
+
+    @Test
+    public void testRegisterUser_noUserName() throws Exception {
+        String userName = null;
+        String passwordNotEncoded = "password";
+        assertNull(userRepository.findByUsername(userName));
+
+        UserCreateDto userCreateDto = createUserCreateDto(userName, passwordNotEncoded);
+
+        mockMvc.perform(post(URL_USERS_REGISTER)
+                .content(this.json(userCreateDto))
+                .contentType(contentType))
+                .andExpect(status().isBadRequest());
+
+        assertNull(userRepository.findByUsername(userName));
+    }
+
+    @Test
+    public void testRegisterUser_noPassword() throws Exception {
+        String userName = "abv@b.cd";
+        String passwordNotEncoded = null;
+        assertNull(userRepository.findByUsername(userName));
+
+        UserCreateDto userCreateDto = createUserCreateDto(userName, passwordNotEncoded);
+
+        mockMvc.perform(post(URL_USERS_REGISTER)
+                .content(this.json(userCreateDto))
+                .contentType(contentType))
+                .andExpect(status().isBadRequest());
+
+        assertNull(userRepository.findByUsername(userName));
+    }
+
+    // helper methods
+
+    private UserCreateDto createUserCreateDto(String userName, String passwordNotEncoded) {
+        UserCreateDto userCreateDto = new UserCreateDto();
+        userCreateDto.setUsername(userName);
+        userCreateDto.setPassword(passwordNotEncoded);
+        return userCreateDto;
+    }
 }
