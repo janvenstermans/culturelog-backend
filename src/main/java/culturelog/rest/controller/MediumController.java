@@ -6,10 +6,10 @@ import culturelog.rest.dto.MediumDto;
 import culturelog.rest.exception.CultureLogException;
 import culturelog.rest.security.CultureLogSecurityService;
 import culturelog.rest.service.MediumService;
-import culturelog.rest.service.MediumService;
 import culturelog.rest.utils.MediumUtils;
 import culturelog.rest.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * @author Jan Venstermans
@@ -33,6 +35,9 @@ public class MediumController {
 
     @Autowired
     private CultureLogSecurityService securityService;
+
+    @Autowired
+    private MessageSource httpErrorFeedbackMessageSource;
 
     @RequestMapping(method = RequestMethod.POST)
     @PreAuthorize("isAuthenticated()")
@@ -65,13 +70,13 @@ public class MediumController {
 
     @RequestMapping(value = "/{mediumId}", method = RequestMethod.GET)
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getMedium(@PathVariable(value="mediumId", required = true) Long mediumId) {
+    public ResponseEntity<?> getMedium(@PathVariable(value="mediumId") Long mediumId, Locale locale) {
         User user = securityService.getLoggedInUser();
         Medium medium = mediumService.getById(mediumId);
         if (medium != null && MediumUtils.isMediumOfUser(medium, user, true)) {
             return ResponseEntity.ok(MediumUtils.toMediumDto(medium));
         }
-        return ResponseEntity.badRequest().body("Cannot find medium with id " + mediumId);
+        return ResponseEntity.badRequest().body(httpErrorFeedbackMessageSource.getMessage("media.getOne.unknownId", new Object[]{mediumId}, locale));
     }
 
     @RequestMapping(value = "/{mediumId}", method = RequestMethod.PUT)

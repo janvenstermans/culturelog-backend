@@ -16,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MvcResult;
@@ -33,6 +34,8 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -87,7 +90,9 @@ public class MediumControllerTest extends ControllerTestAbstract {
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(mediumDto))
                 .contentType(contentType))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
 
         List<Medium> mediumList = mediumRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
         Assert.assertEquals(0, mediumList.size());
@@ -104,7 +109,9 @@ public class MediumControllerTest extends ControllerTestAbstract {
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(mediumDto))
                 .contentType(contentType))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
 
         List<Medium> mediumList = mediumRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
         Assert.assertEquals(0, mediumList.size());
@@ -150,7 +157,9 @@ public class MediumControllerTest extends ControllerTestAbstract {
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(mediumDto))
                 .contentType(contentType))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
 
         List<Medium> mediumList = mediumRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
         Assert.assertEquals(1, mediumList.size());
@@ -319,7 +328,9 @@ public class MediumControllerTest extends ControllerTestAbstract {
 
         mockMvc.perform(get(String.format(URL_MEDIA_ONE, mediumId))
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
     }
 
     @Test
@@ -329,7 +340,9 @@ public class MediumControllerTest extends ControllerTestAbstract {
 
         mockMvc.perform(get(String.format(URL_MEDIA_ONE, mediumId))
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
     }
 
     // url /media/{mediumId} PUT
@@ -355,7 +368,10 @@ public class MediumControllerTest extends ControllerTestAbstract {
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(mediumDto))
                 .contentType(contentType))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
+
     }
 
     @Test
@@ -423,7 +439,35 @@ public class MediumControllerTest extends ControllerTestAbstract {
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(mediumDto))
                 .contentType(contentType))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
+
+        Medium mediumAfterwards = mediumRepository.findOne(mediumId);
+        Assert.assertEquals(medium1.getName(), mediumAfterwards.getName());
+        Assert.assertEquals(medium1.getDescription(), mediumAfterwards.getDescription());
+        Assert.assertNotEquals(mediumDto.getName(), mediumAfterwards.getName());
+        Assert.assertNotEquals(mediumDto.getDescription(), mediumAfterwards.getDescription());
+    }
+
+    @Test
+    public void testPutMediaOne_cannotEditOwnMediumSoThatNameIsNull() throws Exception {
+        User user1 = userRepository.findOne(CultureLogTestConfiguration.getUser1Id());
+        Medium medium1 = mediumRepository.save(createMediumToSave("testOne", user1));
+        Long mediumId = medium1.getId();
+
+        MediumDto mediumDto = new MediumDto();
+        mediumDto.setId(mediumId);
+        mediumDto.setName(null);
+        mediumDto.setDescription((medium1.getDescription() != null ? medium1.getDescription() : "") + "Edited");
+
+        mockMvc.perform(put(String.format(URL_MEDIA_ONE, mediumId))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
+                .content(this.json(mediumDto))
+                .contentType(contentType))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
 
         Medium mediumAfterwards = mediumRepository.findOne(mediumId);
         Assert.assertEquals(medium1.getName(), mediumAfterwards.getName());
@@ -444,7 +488,9 @@ public class MediumControllerTest extends ControllerTestAbstract {
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(mediumDto))
                 .contentType(contentType))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
     }
 
     @Test
@@ -459,7 +505,9 @@ public class MediumControllerTest extends ControllerTestAbstract {
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(mediumDto))
                 .contentType(contentType))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
     }
 
     // helper methods
