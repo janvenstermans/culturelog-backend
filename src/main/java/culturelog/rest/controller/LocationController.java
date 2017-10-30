@@ -52,14 +52,9 @@ public class LocationController {
     @RequestMapping(method = RequestMethod.GET)
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getLocationsOfUser() {
-        try {
-            Long userId = securityService.getLoggedInUserId();
-            List<Location> locationList = locationService.getLocationsOfUserByUserId(userId, true);
-            return ResponseEntity.ok(LocationUtils.toLocationDtoList(locationList));
-//        } catch (CultureLogException e) {
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e);
-        }
+        Long userId = securityService.getLoggedInUserId();
+        List<Location> locationList = locationService.getLocationsOfUserByUserId(userId, true);
+        return ResponseEntity.ok(LocationUtils.toLocationDtoList(locationList));
     }
 
     @RequestMapping(value = "/{locationId}", method = RequestMethod.GET)

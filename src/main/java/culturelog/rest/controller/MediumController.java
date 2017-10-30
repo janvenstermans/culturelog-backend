@@ -58,14 +58,9 @@ public class MediumController {
     @RequestMapping(method = RequestMethod.GET)
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getMediaOfUserAndGlobalMedia() {
-        try {
-            Long userId = securityService.getLoggedInUserId();
-            List<Medium> mediumList = mediumService.getMediaOfUserByUserId(userId, true);
-            return ResponseEntity.ok(MediumUtils.toMediumDtoList(mediumList));
-//        } catch (CultureLogException e) {
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e);
-        }
+        Long userId = securityService.getLoggedInUserId();
+        List<Medium> mediumList = mediumService.getMediaOfUserByUserId(userId, true);
+        return ResponseEntity.ok(MediumUtils.toMediumDtoList(mediumList));
     }
 
     @RequestMapping(value = "/{mediumId}", method = RequestMethod.GET)

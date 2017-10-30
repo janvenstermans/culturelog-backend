@@ -16,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MvcResult;
@@ -33,6 +34,8 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -87,7 +90,9 @@ public class LocationControllerTest extends ControllerTestAbstract {
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(locationDto))
                 .contentType(contentType))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
 
         List<Location> locationList = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
         Assert.assertEquals(0, locationList.size());
@@ -104,7 +109,9 @@ public class LocationControllerTest extends ControllerTestAbstract {
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(locationDto))
                 .contentType(contentType))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
 
         List<Location> locationList = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
         Assert.assertEquals(0, locationList.size());
@@ -150,7 +157,9 @@ public class LocationControllerTest extends ControllerTestAbstract {
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(locationDto))
                 .contentType(contentType))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
 
         List<Location> locationList = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
         Assert.assertEquals(1, locationList.size());
@@ -319,7 +328,9 @@ public class LocationControllerTest extends ControllerTestAbstract {
 
         mockMvc.perform(get(String.format(URL_LOCATIONS_ONE, locationId))
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
     }
 
     @Test
@@ -329,7 +340,9 @@ public class LocationControllerTest extends ControllerTestAbstract {
 
         mockMvc.perform(get(String.format(URL_LOCATIONS_ONE, locationId))
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
     }
 
     // url /locations/{locationId} PUT
@@ -355,7 +368,9 @@ public class LocationControllerTest extends ControllerTestAbstract {
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(locationDto))
                 .contentType(contentType))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
     }
 
     @Test
@@ -423,7 +438,35 @@ public class LocationControllerTest extends ControllerTestAbstract {
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(locationDto))
                 .contentType(contentType))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
+
+        Location locationAfterwards = locationRepository.findOne(locationId);
+        Assert.assertEquals(location1.getName(), locationAfterwards.getName());
+        Assert.assertEquals(location1.getDescription(), locationAfterwards.getDescription());
+        Assert.assertNotEquals(locationDto.getName(), locationAfterwards.getName());
+        Assert.assertNotEquals(locationDto.getDescription(), locationAfterwards.getDescription());
+    }
+
+    @Test
+    public void testPutLocationsOne_cannotEditOwnLocationSoThatNameIsNull() throws Exception {
+        User user1 = userRepository.findOne(CultureLogTestConfiguration.getUser1Id());
+        Location location1 = locationRepository.save(createLocationToSave("testOne", user1));
+        Long locationId = location1.getId();
+
+        LocationDto locationDto = new LocationDto();
+        locationDto.setId(locationId);
+        locationDto.setName(null);
+        locationDto.setDescription((location1.getDescription() != null ? location1.getDescription() : "") + "Edited");
+
+        mockMvc.perform(put(String.format(URL_LOCATIONS_ONE, locationId))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
+                .content(this.json(locationDto))
+                .contentType(contentType))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
 
         Location locationAfterwards = locationRepository.findOne(locationId);
         Assert.assertEquals(location1.getName(), locationAfterwards.getName());
@@ -444,7 +487,9 @@ public class LocationControllerTest extends ControllerTestAbstract {
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(locationDto))
                 .contentType(contentType))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
     }
 
     @Test
@@ -459,7 +504,9 @@ public class LocationControllerTest extends ControllerTestAbstract {
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
                 .content(this.json(locationDto))
                 .contentType(contentType))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
     }
 
     // helper methods
