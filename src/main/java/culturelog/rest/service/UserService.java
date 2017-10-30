@@ -4,6 +4,7 @@ import culturelog.rest.domain.User;
 import culturelog.rest.dto.UserCreateDto;
 import culturelog.rest.dto.UserDto;
 import culturelog.rest.exception.CultureLogException;
+import culturelog.rest.exception.CultureLogExceptionKey;
 import culturelog.rest.repository.UserRepository;
 import culturelog.rest.utils.CultureLogUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,20 +39,20 @@ public class UserService {
 
     public User registerUser(UserCreateDto userCreateDto) throws CultureLogException {
         if (userCreateDto == null) {
-            throw new IllegalArgumentException("Cannot save null user");
+            throw new CultureLogException(CultureLogExceptionKey.USER_NULL);
         }
         String username = userCreateDto.getUsername();
         String password = userCreateDto.getPassword();
         if (CultureLogUtils.isNullOrEmpty(username) || CultureLogUtils.isNullOrEmpty(password)) {
-            throw new CultureLogException("Cannot create user: username or password not provided");
+            throw new CultureLogException(CultureLogExceptionKey.USER_NOT_ENOUGH_DATA);
         }
         // check if username is not yet in db
         if (getByUserName(username) != null) {
-            throw new CultureLogException("Cannot create user: username allready in use");
+            throw new CultureLogException(CultureLogExceptionKey.USERNAME_IN_USE);
         }
 //        // check if username is email: is done also in entity, but this will give more ok
         if (!CultureLogUtils.isEmail(username)) {
-            throw new CultureLogException("Cannot create user: username must be email");
+            throw new CultureLogException(CultureLogExceptionKey.USERNAME_MUST_BE_EMAIL);
         }
         // don't save the given user object, create new object and save some attributes
         User newUser = new User();
@@ -61,8 +62,7 @@ public class UserService {
         try {
             return userRepository.save(newUser);
         } catch (ConstraintViolationException cve) {
-            //TODO: use well
-            throw new CultureLogException(cve.getMessage());
+            throw new CultureLogException(CultureLogExceptionKey.USERSAVE_CONTRAINT_VIOLATION);
         }
     }
 

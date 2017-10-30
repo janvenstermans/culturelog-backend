@@ -4,15 +4,25 @@ package culturelog.rest.exception;
  * @author Jan Venstermans
  */
 public class CultureLogException extends Exception {
-    public CultureLogException(String message) {
-        super(message);
+
+    private final CultureLogExceptionKey key;
+    private final Object[] objects;
+
+    public CultureLogException(CultureLogExceptionKey key) {
+        this(key, null);
     }
 
-    public CultureLogException(String message, Throwable cause) {
-        super(message, cause);
+    public CultureLogException(CultureLogExceptionKey key, Object[] objects) {
+        super(key.getKey());
+        this.key = key;
+        this.objects = objects;
     }
 
-    public CultureLogException(Throwable cause) {
-        super(cause);
+    public CultureLogExceptionKey getKey() {
+        return key;
+    }
+
+    public Object[] getObjects() {
+        return objects;
     }
 }

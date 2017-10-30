@@ -2,6 +2,7 @@ package culturelog.rest.service;
 
 import culturelog.rest.domain.Medium;
 import culturelog.rest.exception.CultureLogException;
+import culturelog.rest.exception.CultureLogExceptionKey;
 import culturelog.rest.repository.MediumRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,13 +21,13 @@ public class MediumService {
 
     public Medium save(Medium medium) throws CultureLogException {
         if (medium.getName() == null) {
-            throw new CultureLogException("Medium needs a name attribute");
+            throw new CultureLogException(CultureLogExceptionKey.MEDIUM_NEEDS_NAME_ATTRIBUTE);
         }
         //check user-Naam combination
         Long userId = medium.getUser() != null ? medium.getUser().getId() : null;
         Optional<Medium> existing = mediumRepository.findByUserIdAndName(userId, medium.getName());
         if (existing.isPresent()) {
-            throw new CultureLogException("There is already a medium object with name " + medium.getName() + " for logged in user");
+            throw new CultureLogException(CultureLogExceptionKey.MEDIUM_WITH_NAME_FOR_USER_ALREADY_EXISTS, new Object[] {medium.getName()});
         }
         return mediumRepository.save(medium);
     }

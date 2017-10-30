@@ -31,18 +31,18 @@ public class ExperienceService {
 //        return experienceRepository.findOne(experienceId);
 //    }
 
-    private void checkRequiredFieldsForSave(Experience experience) throws CultureLogException {
-        if (experience == null) {
-            return;
-        }
-        if (CultureLogUtils.isNullOrEmpty(experience.getUsername())) {
-            throw new CultureLogException("Cannot save experience with empty field username");
-        }
-        if (CultureLogUtils.isNullOrEmpty(experience.getTitle())) {
-            throw new CultureLogException("Cannot save experience with empty field title");
-        }
-        if (experience.getDate() == null) {
-            throw new CultureLogException("Cannot save experience with empty field date");
-        }
-    }
+//    private void checkRequiredFieldsForSave(Experience experience) throws CultureLogException {
+//        if (experience == null) {
+//            return;
+//        }
+//        if (CultureLogUtils.isNullOrEmpty(experience.getUsername())) {
+//            throw new CultureLogException("Cannot save experience with empty field username");
+//        }
+//        if (CultureLogUtils.isNullOrEmpty(experience.getTitle())) {
+//            throw new CultureLogException("Cannot save experience with empty field title");
+//        }
+//        if (experience.getDate() == null) {
+//            throw new CultureLogException("Cannot save experience with empty field date");
+//        }
+//    }
 }

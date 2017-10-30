@@ -2,7 +2,6 @@ package culturelog.rest.controller;
 
 import culturelog.rest.domain.User;
 import culturelog.rest.dto.UserCreateDto;
-import culturelog.rest.dto.UserDto;
 import culturelog.rest.exception.CultureLogException;
 import culturelog.rest.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +37,7 @@ public class UserController {
             User newUser = userService.registerUser(userCreateDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(userService.toUserDto(newUser));
         } catch (CultureLogException e) {
+            String main = "Cannot create user";
             // maybe split it up, in different return codes
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e);
         }

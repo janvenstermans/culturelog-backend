@@ -27,9 +27,16 @@ public class CultureLogRestConfiguration {
     }
 
     @Bean
-    public MessageSource httpErrorFeedbackMessageSource() {
+    public MessageSource cultureLogControllerMessages() {
         ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-        messageSource.setBasename("i18n/httpErrorFeedbackMessages");
+        messageSource.setBasename("i18n/cultureLogControllerMessages");
+        return messageSource;
+    }
+
+    @Bean
+    public MessageSource cultureLogMessages() {
+        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+        messageSource.setBasename("i18n/cultureLogMessages");
         return messageSource;
     }
 }

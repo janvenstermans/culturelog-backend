@@ -2,6 +2,7 @@ package culturelog.rest.service;
 
 import culturelog.rest.domain.Location;
 import culturelog.rest.exception.CultureLogException;
+import culturelog.rest.exception.CultureLogExceptionKey;
 import culturelog.rest.repository.LocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,13 +21,13 @@ public class LocationService {
 
     public Location save(Location location) throws CultureLogException {
         if (location.getName() == null) {
-            throw new CultureLogException("Location needs a name attribute");
+            throw new CultureLogException(CultureLogExceptionKey.LOCATION_NEEDS_NAME_ATTRIBUTE);
         }
         //check user-Naam combination
         Long userId = location.getUser() != null ? location.getUser().getId() : null;
         Optional<Location> existing = locationRepository.findByUserIdAndName(userId, location.getName());
         if (existing.isPresent()) {
-            throw new CultureLogException("There is already a location object with name " + location.getName() + " for logged in user");
+            throw new CultureLogException(CultureLogExceptionKey.LOCATION_WITH_NAME_FOR_USER_ALREADY_EXISTS, new Object[]{location.getName()});
         }
         return locationRepository.save(location);
     }
