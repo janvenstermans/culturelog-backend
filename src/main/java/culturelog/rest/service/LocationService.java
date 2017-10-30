@@ -13,33 +13,11 @@ import java.util.Optional;
 /**
  * @author Jan Venstermans
  */
-@Service
-public class LocationService {
+public interface LocationService {
 
-    @Autowired
-    private LocationRepository locationRepository;
+    Location save(Location location) throws CultureLogException;
 
-    public Location save(Location location) throws CultureLogException {
-        if (location.getName() == null) {
-            throw new CultureLogException(CultureLogExceptionKey.LOCATION_NEEDS_NAME_ATTRIBUTE);
-        }
-        //check user-Naam combination
-        Long userId = location.getUser() != null ? location.getUser().getId() : null;
-        Optional<Location> existing = locationRepository.findByUserIdAndName(userId, location.getName());
-        if (existing.isPresent()) {
-            throw new CultureLogException(CultureLogExceptionKey.LOCATION_WITH_NAME_FOR_USER_ALREADY_EXISTS, new Object[]{location.getName()});
-        }
-        return locationRepository.save(location);
-    }
+    List<Location> getLocationsOfUserByUserId(Long userId, boolean includeGeneral);
 
-    public List<Location> getLocationsOfUserByUserId(Long userId, boolean includeGeneral) {
-        if (includeGeneral) {
-            return locationRepository.findByUserIdIncludingGlobal(userId);
-        }
-        return locationRepository.findByUserId(userId);
-    }
-
-    public Location getById(Long userId) {
-        return locationRepository.findOne(userId);
-    }
+    Location getById(Long userId);
 }
