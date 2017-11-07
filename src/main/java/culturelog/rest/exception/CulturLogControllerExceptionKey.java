@@ -6,8 +6,13 @@ package culturelog.rest.exception;
 public enum CulturLogControllerExceptionKey {
     MEDIA_CREATE("media.create"),
     MEDIA_CREATE_WITH_ID("media.create.withId"),
-    MEDIUM_GET_ONE_UNKNOWN_ID("media.getOne.unknownId"),
-    MEDIUM_UPDATE_ONE("media.updateOne");
+    MEDIA_GET_ONE_UNKNOWN_ID("media.getOne.unknownId"),
+    MEDIA_UPDATE_ONE("media.updateOne"),
+
+    LOCATIONS_CREATE("locations.create"),
+    LOCATIONS_CREATE_WITH_ID("locations.create.withId"),
+    LOCATIONS_GET_ONE_UNKNOWN_ID("locations.getOne.unknownId"),
+    LOCATIONS_UPDATE_ONE("locations.updateOne");
 
     private final String key;
 

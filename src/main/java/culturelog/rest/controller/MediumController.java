@@ -72,7 +72,7 @@ public class MediumController {
             return ResponseEntity.ok(MediumUtils.toMediumDto(medium));
         }
         return ResponseEntity.badRequest().body(messageService.getControllerMessage(
-                CulturLogControllerExceptionKey.MEDIUM_GET_ONE_UNKNOWN_ID, new Object[]{mediumId}, locale));
+                CulturLogControllerExceptionKey.MEDIA_GET_ONE_UNKNOWN_ID, new Object[]{mediumId}, locale));
     }
 
     @RequestMapping(value = "/{mediumId}", method = RequestMethod.PUT)
@@ -83,7 +83,7 @@ public class MediumController {
         Medium existingMedium = mediumService.getById(mediumId);
         if (existingMedium == null || !UserUtils.areUsersSame(existingMedium.getUser(), user)) {
             return ResponseEntity.badRequest().body(messageService.getControllerMessage(
-                    CulturLogControllerExceptionKey.MEDIUM_UPDATE_ONE, new Object[]{mediumId}, locale));
+                    CulturLogControllerExceptionKey.MEDIA_UPDATE_ONE, new Object[]{mediumId}, locale));
         }
         medium.setId(mediumId);
         medium.setUser(user);
@@ -92,7 +92,7 @@ public class MediumController {
             return ResponseEntity.ok(MediumUtils.toMediumDto(updatedMedium));
         } catch (CultureLogException e) {
             return ResponseEntity.badRequest().body(messageService.getControllerMessage(
-                    CulturLogControllerExceptionKey.MEDIUM_UPDATE_ONE, new Object[]{mediumId}, e, locale));
+                    CulturLogControllerExceptionKey.MEDIA_UPDATE_ONE, new Object[]{mediumId}, e, locale));
         }
     }
 

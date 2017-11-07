@@ -3,9 +3,11 @@ package culturelog.rest.controller;
 import culturelog.rest.domain.Location;
 import culturelog.rest.domain.User;
 import culturelog.rest.dto.LocationDto;
+import culturelog.rest.exception.CulturLogControllerExceptionKey;
 import culturelog.rest.exception.CultureLogException;
 import culturelog.rest.security.CultureLogSecurityService;
 import culturelog.rest.service.LocationService;
+import culturelog.rest.service.MessageService;
 import culturelog.rest.utils.LocationUtils;
 import culturelog.rest.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * @author Jan Venstermans
@@ -33,9 +36,12 @@ public class LocationController {
     @Autowired
     private CultureLogSecurityService securityService;
 
+    @Autowired
+    private MessageService messageService;
+
     @RequestMapping(method = RequestMethod.POST)
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> createLocation(@RequestBody(required = true) LocationDto locationDto) {
+    public ResponseEntity<?> createLocation(@RequestBody LocationDto locationDto, Locale locale) {
         Location location = LocationUtils.fromLocationDto(locationDto);
         if (location.getId() != null) {
             return ResponseEntity.badRequest().body("Cannot create location with id ");
@@ -45,7 +51,7 @@ public class LocationController {
             Location newLocation = locationService.save(location);
             return ResponseEntity.status(HttpStatus.CREATED).body(LocationUtils.toLocationDto(newLocation));
         } catch (CultureLogException e) {
-            return ResponseEntity.badRequest().body(e);
+            return ResponseEntity.badRequest().body(messageService.getControllerMessage(CulturLogControllerExceptionKey.LOCATIONS_CREATE, e, locale));
         }
     }
 
@@ -59,24 +65,26 @@ public class LocationController {
 
     @RequestMapping(value = "/{locationId}", method = RequestMethod.GET)
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getLocation(@PathVariable(value="locationId", required = true) Long locationId) {
+    public ResponseEntity<?> getLocation(@PathVariable(value="locationId") Long locationId, Locale locale) {
         User user = securityService.getLoggedInUser();
         Location location = locationService.getById(locationId);
         if (location != null && LocationUtils.isLocationOfUser(location, user, true)) {
             return ResponseEntity.ok(LocationUtils.toLocationDto(location));
         }
-        return ResponseEntity.badRequest().body("Cannot find location with id " + locationId);
+        return ResponseEntity.badRequest().body(messageService.getControllerMessage(
+                CulturLogControllerExceptionKey.LOCATIONS_GET_ONE_UNKNOWN_ID, new Object[]{locationId}, locale));
     }
 
     @RequestMapping(value = "/{locationId}", method = RequestMethod.PUT)
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> updateLocation(@PathVariable(value="locationId", required = true) Long locationId,
-                                              @RequestBody(required = true) LocationDto locationDto) {
+    public ResponseEntity<?> updateLocation(@PathVariable(value="locationId") Long locationId,
+                                              @RequestBody LocationDto locationDto, Locale locale) {
         Location location = LocationUtils.fromLocationDto(locationDto);
         User user = securityService.getLoggedInUser();
         Location existingLocation = locationService.getById(locationId);
         if (existingLocation == null || !UserUtils.areUsersSame(existingLocation.getUser(), user)) {
-            return ResponseEntity.badRequest().body("Cannot update location with id " + locationId);
+            return ResponseEntity.badRequest().body(messageService.getControllerMessage(
+                    CulturLogControllerExceptionKey.LOCATIONS_UPDATE_ONE, new Object[]{locationId}, locale));
         }
         location.setId(locationId);
         location.setUser(user);
@@ -84,7 +92,8 @@ public class LocationController {
             Location updatedLocation = locationService.save(location);
             return ResponseEntity.ok(LocationUtils.toLocationDto(updatedLocation));
         } catch (CultureLogException e) {
-            return ResponseEntity.badRequest().body(e);
+            return ResponseEntity.badRequest().body(messageService.getControllerMessage(
+                    CulturLogControllerExceptionKey.LOCATIONS_UPDATE_ONE, new Object[]{locationId}, e, locale));
         }
     }
 
