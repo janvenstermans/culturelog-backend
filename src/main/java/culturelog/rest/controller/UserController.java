@@ -37,7 +37,7 @@ public class UserController {
      * @param userCreateDto containing not-encoded password
      * @return
      */
-    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    @RequestMapping(value = "", method = RequestMethod.POST)
     @PreAuthorize("permitAll")
     public ResponseEntity<?> registerUser(@RequestBody UserCreateDto userCreateDto, Locale locale) {
         try {

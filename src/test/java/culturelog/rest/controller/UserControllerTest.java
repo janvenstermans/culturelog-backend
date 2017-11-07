@@ -15,6 +15,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -33,34 +34,32 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = CulturelogRestApplication.class)
 @WebAppConfiguration
+@Transactional // db changes in one test are rolled back after test
 public class UserControllerTest extends ControllerTestAbstract {
 
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private MessageService messageService;
+    private static final String URL_USERS = "/users";
 
-    private static final String URL_USERS_REGISTER = "/users/register";
-
-    // users/register OPTIONS
+    // users OPTIONS
 
     @Test
-    public void testLocationsUrl_allowedMethods() throws Exception {
-        testUrlAllowedMethods(URL_USERS_REGISTER, HttpMethod.POST);
+    public void testUsersUrl_allowedMethods() throws Exception {
+        testUrlAllowedMethods(URL_USERS, HttpMethod.POST);
     }
 
-    // users/register POST
+    // users POST
 
     @Test
-    public void testRegisterUser_userNameAlreadyExists() throws Exception {
+    public void testCreateUser_userNameAlreadyExists() throws Exception {
         String userName = CultureLogTestConfiguration.USER1_NAME;
         String passwordNotEncoded = "password";
         Assert.assertNotNull(userRepository.findByUsername(userName));
 
         UserCreateDto userCreateDto = createUserCreateDto(userName, passwordNotEncoded);
 
-        mockMvc.perform(post(URL_USERS_REGISTER)
+        mockMvc.perform(post(URL_USERS)
                 .content(this.json(userCreateDto))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest())
@@ -69,14 +68,14 @@ public class UserControllerTest extends ControllerTestAbstract {
     }
 
     @Test
-    public void testRegisterUser_userNameIsEmailAdress() throws Exception {
+    public void testCreateUser_userNameIsEmailAdress() throws Exception {
         String userName = "abv@b.cd";
         String passwordNotEncoded = "password";
         assertNull(userRepository.findByUsername(userName));
 
         UserCreateDto userCreateDto = createUserCreateDto(userName, passwordNotEncoded);
 
-        mockMvc.perform(post(URL_USERS_REGISTER)
+        mockMvc.perform(post(URL_USERS)
                 .content(this.json(userCreateDto))
                 .contentType(contentType))
                 .andExpect(status().isCreated());
@@ -88,14 +87,14 @@ public class UserControllerTest extends ControllerTestAbstract {
     }
 
     @Test
-    public void testRegisterUser_userNameIsNotEmailAdress() throws Exception {
+    public void testCreateUser_userNameIsNotEmailAdress() throws Exception {
         String userName = "abcd";
         String passwordNotEncoded = "password";
         assertNull(userRepository.findByUsername(userName));
 
         UserCreateDto userCreateDto = createUserCreateDto(userName, passwordNotEncoded);
 
-        mockMvc.perform(post(URL_USERS_REGISTER)
+        mockMvc.perform(post(URL_USERS)
                 .content(this.json(userCreateDto))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest())
@@ -106,14 +105,14 @@ public class UserControllerTest extends ControllerTestAbstract {
     }
 
     @Test
-    public void testRegisterUser_dtoEmpty() throws Exception {
+    public void testCreateUser_dtoEmpty() throws Exception {
         String userName = null;
         String passwordNotEncoded = null;
         assertNull(userRepository.findByUsername(userName));
 
         UserCreateDto userCreateDto = createUserCreateDto(userName, passwordNotEncoded);
 
-        mockMvc.perform(post(URL_USERS_REGISTER)
+        mockMvc.perform(post(URL_USERS)
                 .content(this.json(userCreateDto))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest())
@@ -124,14 +123,14 @@ public class UserControllerTest extends ControllerTestAbstract {
     }
 
     @Test
-    public void testRegisterUser_noUserName() throws Exception {
+    public void testCreateUser_noUserName() throws Exception {
         String userName = null;
         String passwordNotEncoded = "password";
         assertNull(userRepository.findByUsername(userName));
 
         UserCreateDto userCreateDto = createUserCreateDto(userName, passwordNotEncoded);
 
-        mockMvc.perform(post(URL_USERS_REGISTER)
+        mockMvc.perform(post(URL_USERS)
                 .content(this.json(userCreateDto))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest())
@@ -142,14 +141,14 @@ public class UserControllerTest extends ControllerTestAbstract {
     }
 
     @Test
-    public void testRegisterUser_noPassword() throws Exception {
+    public void testCreateUser_noPassword() throws Exception {
         String userName = "abv@b.cd";
         String passwordNotEncoded = null;
         assertNull(userRepository.findByUsername(userName));
 
         UserCreateDto userCreateDto = createUserCreateDto(userName, passwordNotEncoded);
 
-        mockMvc.perform(post(URL_USERS_REGISTER)
+        mockMvc.perform(post(URL_USERS)
                 .content(this.json(userCreateDto))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest())
@@ -158,6 +157,8 @@ public class UserControllerTest extends ControllerTestAbstract {
 
         assertNull(userRepository.findByUsername(userName));
     }
+
+    //TODO: create test that is succesful for user create
 
     // helper methods
 
