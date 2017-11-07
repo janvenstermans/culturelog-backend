@@ -5,12 +5,14 @@ import culturelog.rest.configuration.CultureLogTestConfiguration;
 import culturelog.rest.domain.User;
 import culturelog.rest.dto.UserCreateDto;
 import culturelog.rest.repository.UserRepository;
+import culturelog.rest.service.MessageService;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
@@ -19,7 +21,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -34,6 +37,9 @@ public class UserControllerTest extends ControllerTestAbstract {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private MessageService messageService;
 
     private static final String URL_USERS_REGISTER = "/users/register";
 
@@ -57,7 +63,9 @@ public class UserControllerTest extends ControllerTestAbstract {
         mockMvc.perform(post(URL_USERS_REGISTER)
                 .content(this.json(userCreateDto))
                 .contentType(contentType))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
     }
 
     @Test
@@ -90,7 +98,9 @@ public class UserControllerTest extends ControllerTestAbstract {
         mockMvc.perform(post(URL_USERS_REGISTER)
                 .content(this.json(userCreateDto))
                 .contentType(contentType))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
 
         assertNull(userRepository.findByUsername(userName));
     }
@@ -106,7 +116,9 @@ public class UserControllerTest extends ControllerTestAbstract {
         mockMvc.perform(post(URL_USERS_REGISTER)
                 .content(this.json(userCreateDto))
                 .contentType(contentType))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
 
         assertNull(userRepository.findByUsername(userName));
     }
@@ -122,7 +134,9 @@ public class UserControllerTest extends ControllerTestAbstract {
         mockMvc.perform(post(URL_USERS_REGISTER)
                 .content(this.json(userCreateDto))
                 .contentType(contentType))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
 
         assertNull(userRepository.findByUsername(userName));
     }
@@ -138,7 +152,9 @@ public class UserControllerTest extends ControllerTestAbstract {
         mockMvc.perform(post(URL_USERS_REGISTER)
                 .content(this.json(userCreateDto))
                 .contentType(contentType))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
 
         assertNull(userRepository.findByUsername(userName));
     }

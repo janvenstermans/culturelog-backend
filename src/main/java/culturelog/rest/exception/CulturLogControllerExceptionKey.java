@@ -4,6 +4,8 @@ package culturelog.rest.exception;
  * @author Jan Venstermans
  */
 public enum CulturLogControllerExceptionKey {
+    USERS_CREATE("users.create"),
+
     MEDIA_CREATE("media.create"),
     MEDIA_CREATE_WITH_ID("media.create.withId"),
     MEDIA_GET_ONE_UNKNOWN_ID("media.getOne.unknownId"),

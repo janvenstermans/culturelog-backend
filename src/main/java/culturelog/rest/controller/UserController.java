@@ -2,7 +2,9 @@ package culturelog.rest.controller;
 
 import culturelog.rest.domain.User;
 import culturelog.rest.dto.UserCreateDto;
+import culturelog.rest.exception.CulturLogControllerExceptionKey;
 import culturelog.rest.exception.CultureLogException;
+import culturelog.rest.service.MessageService;
 import culturelog.rest.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Locale;
 
 /**
  * @author Jan Venstermans
@@ -25,6 +29,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private MessageService messageService;
+
     /**
      *
      * @param userCreateDto containing not-encoded password
@@ -32,14 +39,12 @@ public class UserController {
      */
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @PreAuthorize("permitAll")
-    public ResponseEntity<?> registerUser(@RequestBody(required = true) UserCreateDto userCreateDto) {
+    public ResponseEntity<?> registerUser(@RequestBody UserCreateDto userCreateDto, Locale locale) {
         try {
             User newUser = userService.registerUser(userCreateDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(userService.toUserDto(newUser));
         } catch (CultureLogException e) {
-            String main = "Cannot create user";
-            // maybe split it up, in different return codes
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e);
+            return ResponseEntity.badRequest().body(messageService.getControllerMessage(CulturLogControllerExceptionKey.USERS_CREATE, e, locale));
         }
     }
 
