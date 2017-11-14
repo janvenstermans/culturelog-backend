@@ -1,0 +1,82 @@
+databaseChangeLog:
+  - changeSet:
+      id: 7
+      author: janvenstermans
+      changes:
+        - createTable:
+            tableName: experience
+            schemaName: culturelog
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: experience_type_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: moment_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: location_id
+                  type: int
+              - column:
+                  name: comment
+                  type: varchar(5000)
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: experience
+            baseTableSchemaName: culturelog
+            constraintName: fk_experience_user
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: user
+            referencedTableSchemaName: culturelog
+        - addForeignKeyConstraint:
+            baseColumnNames: experience_type_id
+            baseTableName: experience
+            baseTableSchemaName: culturelog
+            constraintName: fk_experience_medium
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: medium
+            referencedTableSchemaName: culturelog
+        - addForeignKeyConstraint:
+            baseColumnNames: moment_id
+            baseTableName: experience
+            baseTableSchemaName: culturelog
+            constraintName: fk_experience_moment
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: moment
+            referencedTableSchemaName: culturelog
+        - addForeignKeyConstraint:
+            baseColumnNames: location_id
+            baseTableName: experience
+            baseTableSchemaName: culturelog
+            constraintName: fk_experience_location
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: location
+            referencedTableSchemaName: culturelog

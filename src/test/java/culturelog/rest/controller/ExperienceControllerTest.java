@@ -4,6 +4,8 @@ import culturelog.rest.CulturelogRestApplication;
 import culturelog.rest.configuration.CultureLogTestConfiguration;
 import culturelog.rest.domain.Experience;
 import culturelog.rest.domain.User;
+import culturelog.rest.dto.ExperienceDto;
+import culturelog.rest.dto.LocationDto;
 import culturelog.rest.dto.UserCreateDto;
 import culturelog.rest.repository.ExperienceRepository;
 import culturelog.rest.repository.UserRepository;
@@ -23,13 +25,14 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Test class for {@link UserController}.
+ * Test class for {@link ExperienceController}.
  *
  * @author Jan Venstermans
  */
@@ -60,28 +63,38 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
     // experiences POST
 
     @Test
-    public void testCreateExperience_mediumAbsent_badRequestMediumRequired() throws Exception {
-        User user1 = userRepository.findOne(CultureLogTestConfiguration.getUser1Id());
-        Experience userCreateDto = creatExperienceToSave("exp1", user1);
-
-//        int experienceCountBefore = experienceRepository.findAll().size();
+    public void testCreateExperience_notAuthorized() throws Exception {
+        ExperienceDto experienceDto = new ExperienceDto();
 
         mockMvc.perform(post(URL_EXPERIENCES)
-                .content(this.json(userCreateDto))
+                .content(this.json(experienceDto))
                 .contentType(contentType))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
-                .andDo(print());
+                .andExpect(status().isUnauthorized());
+    }
 
-//        int experienceCountAfter = experienceRepository.findAll().size();
-//        assertEquals(experienceCountBefore, experienceCountAfter);
+    @Test
+    public void testCreateExperience_nameAbsent_badRequestMediumRequired() throws Exception {
+        ExperienceDto experienceDto = creatExperienceToSave(null);
+
+        int experienceCountBefore = experienceRepository.findAll().size();
+
+        mockMvc.perform(post(URL_EXPERIENCES)
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
+                .content(this.json(experienceDto))
+                .contentType(contentType))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE));
+
+        int experienceCountAfter = experienceRepository.findAll().size();
+        assertEquals(experienceCountBefore, experienceCountAfter);
     }
 
     // helper methods
 
-    private Experience creatExperienceToSave(String name, User user) {
-        Experience experience = new Experience();
-        //TODO
+    private ExperienceDto creatExperienceToSave(String name) {
+        ExperienceDto experience = new ExperienceDto();
+        experience.setName(name);
         return experience;
     }
 }

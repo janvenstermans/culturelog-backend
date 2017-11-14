@@ -1,0 +1,87 @@
+databaseChangeLog:
+  - changeSet:
+      id: 6
+      author: janvenstermans
+      changes:
+        - createTable:
+            tableName: display_date
+            schemaName: culturelog
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: type
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date
+                  type: date
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: moment
+            schemaName: culturelog
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: type
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(1000)
+              - column:
+                  name: user_id
+                  type: int
+        - createTable:
+            tableName: moment_display_date
+            schemaName: culturelog
+            columns:
+              - column:
+                  name: moment_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: display_date_id
+                  type: int
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseColumnNames: moment_id
+            baseTableName: moment_display_date
+            baseTableSchemaName: culturelog
+            constraintName: fk_moment_display_date_for_moment
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: moment
+            referencedTableSchemaName: culturelog
+        - addForeignKeyConstraint:
+            baseColumnNames: display_date_id
+            baseTableName: moment_display_date
+            baseTableSchemaName: culturelog
+            constraintName: fk_moment_display_date_for_display_date
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: display_date
+            referencedTableSchemaName: culturelog
+        - addUniqueConstraint:
+            columnNames: moment_id,display_date_id
+            constraintName: moment_display_date_unique
+            tableName: moment_display_date
+            schemaName: culturelog

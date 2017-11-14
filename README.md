@@ -35,9 +35,18 @@ or add them as startup parameters ("java -jar culturelog-rest.jar --server.port=
 
 Login/password security is used.
 
-## api documentation
+## model documentation
 
-currently, user and experience endpoints exist
+### experience
+
+This is the central object of the api. It is the (cultural) experience that has some kind of date attachted to t.
+More in detail, this object contains info about:
+
+* *type* : WHAT: obligatory: kind of experience: film, theater, a sport manifestation, ...
+* *moment* : WHEN: obligatory: contains some kind of date/time info. This can be a single date, a date+time, a period or a mix of all those things.
+* *location* : WHERE: optional: information about the (geographical) location of an experience: a specific cinema, a venue, ...
+
+## REST api documentation
 
 Default api url startpoint is host/api/...
 

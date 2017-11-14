@@ -1,49 +1,51 @@
 package culturelog.rest.controller;
 
+import culturelog.rest.domain.DisplayDate;
 import culturelog.rest.domain.Experience;
+import culturelog.rest.domain.Moment;
+import culturelog.rest.domain.MomentType;
+import culturelog.rest.dto.ExperienceDto;
 import culturelog.rest.exception.CultureLogException;
 import culturelog.rest.security.CultureLogSecurityService;
 import culturelog.rest.service.ExperienceService;
+import culturelog.rest.utils.ExperienceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 /**
  * @author Jan Venstermans
  */
-//TODO: check later
-//@RestController
-//@RequestMapping("/experiences")
-public class ExperiencesController {
+@RestController
+@RequestMapping("/experiences")
+public class ExperienceController {
 
-//    @Autowired
-//    private ExperienceService experienceService;
-//
-//    @Autowired
-//    private CultureLogSecurityService securityService;
-//
-//    @RequestMapping(method = RequestMethod.POST)
-//    @PreAuthorize("isAuthenticated()")
-//    public ResponseEntity<?> createExperience(@RequestBody(required = true) Experience experience) {
-//        if (experience.getId() != null) {
-//            return ResponseEntity.badRequest().body("Cannot create experience with id ");
-//        }
-//        String username = securityService.getLoggedInUsername();
-//        experience.setUsername(username);
-//        try {
-//            if (experience.getDate() == null) {
-//                experience.setDate(new Date());
-//            }
-//            Experience newExperience = experienceService.save(experience);
-//            return ResponseEntity.ok(newExperience);
-//        } catch (CultureLogException e) {
-//            return ResponseEntity.badRequest().body(e);
-//        }
-//    }
+    @Autowired
+    private ExperienceService experienceService;
+
+    @Autowired
+    private CultureLogSecurityService securityService;
+
+    @RequestMapping(method = RequestMethod.POST)
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> createExperience(@RequestBody ExperienceDto experienceDto) {
+        Experience experience = ExperienceUtils.fromExperienceDto(experienceDto);
+        if (experience.getId() != null) {
+            return ResponseEntity.badRequest().body("Cannot create experience with id ");
+        }
+        experience.setUser(securityService.getLoggedInUser());
+        try {
+            Experience newExperience = experienceService.save(experience);
+            return ResponseEntity.ok(newExperience);
+        } catch (CultureLogException e) {
+            return ResponseEntity.badRequest().body(e);
+        }
+    }
 //
 //    @RequestMapping(method = RequestMethod.GET)
 //    @PreAuthorize("isAuthenticated()")

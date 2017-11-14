@@ -9,14 +9,11 @@ public class ExperienceDto {
 
     private String name;
 
-    //cannot be null
-    private MediumDto mediumDto;
+    private MediumDto type;
 
-    //can be null
-    private LocationDto locationDto;
+    private MomentDto moment;
 
-    //can be null?
-    private MomentDto momentDto;
+    private LocationDto location;
 
     private String comment;
 
@@ -36,28 +33,28 @@ public class ExperienceDto {
         this.name = name;
     }
 
-    public MediumDto getMediumDto() {
-        return mediumDto;
+    public MediumDto getType() {
+        return type;
     }
 
-    public void setMediumDto(MediumDto mediumDto) {
-        this.mediumDto = mediumDto;
+    public void setType(MediumDto type) {
+        this.type = type;
     }
 
-    public LocationDto getLocationDto() {
-        return locationDto;
+    public MomentDto getMoment() {
+        return moment;
     }
 
-    public void setLocationDto(LocationDto locationDto) {
-        this.locationDto = locationDto;
+    public void setMoment(MomentDto moment) {
+        this.moment = moment;
     }
 
-    public MomentDto getMomentDto() {
-        return momentDto;
+    public LocationDto getLocation() {
+        return location;
     }
 
-    public void setMomentDto(MomentDto momentDto) {
-        this.momentDto = momentDto;
+    public void setLocation(LocationDto location) {
+        this.location = location;
     }
 
     public String getComment() {
@@ -71,10 +68,11 @@ public class ExperienceDto {
     @Override
     public String toString() {
         return String.format(
-                "ExperienceDto[id=%s, name='%s', medium='%s', location='%s', moment='%s', comment='%s']",
-                id, name, mediumDto != null ? mediumDto.getDescription() : "",
-                locationDto != null ? locationDto.getDescription() : "",
-                momentDto != null ? momentDto.toString() : "",
+                "ExperienceDto[id=%s, name='%s', type='%s', moment='%s', location='%s', comment='%s']",
+                id, name,
+                type != null ? type.getDescription() : "",
+                moment != null ? moment.toString() : "",
+                location != null ? location.getDescription() : "",
                 comment);
     }
 }

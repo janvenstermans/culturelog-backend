@@ -4,38 +4,43 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.util.Date;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author Jan Venstermans
  */
-//@Entity
-//@Table(name = "experiences")
+@Entity
+@Table(name = "experience")
 public class Experience {
 
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
-     * Name of the user that has created the experience.
-     *
-     * required=true
+     * Name of the experience.
      */
-    private String username;
+    @NotNull
+    private String name;
 
-    /**
-     * required=true
-     */
-    private String title;
+    @ManyToOne
+    @JoinColumn(name = "userId", nullable = false)
+    private User user;
 
-    /**
-     * required=true
-     */
-    private Date date;
+    @ManyToOne
+    @JoinColumn(name = "experienceTypeId", nullable = false)
+    private Medium type;
 
-    private String medium;
+    @ManyToOne
+    @JoinColumn(name = "momentId", nullable = false)
+    private Moment moment;
+
+    @ManyToOne
+    @JoinColumn(name = "locationId")
+    private Location location;
 
     private String comment;
 
@@ -47,36 +52,44 @@ public class Experience {
         this.id = id;
     }
 
-    public String getUsername() {
-        return username;
+    public String getName() {
+        return name;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getTitle() {
-        return title;
+    public User getUser() {
+        return user;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setUser(User user) {
+        this.user = user;
     }
 
-    public Date getDate() {
-        return date;
+    public Medium getType() {
+        return type;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public void setType(Medium type) {
+        this.type = type;
     }
 
-    public String getMedium() {
-        return medium;
+    public Moment getMoment() {
+        return moment;
     }
 
-    public void setMedium(String medium) {
-        this.medium = medium;
+    public void setMoment(Moment moment) {
+        this.moment = moment;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
     public String getComment() {
@@ -90,7 +103,7 @@ public class Experience {
     @Override
     public String toString() {
         return String.format(
-                "Experience[id=%s, username='%s', title='%s', date='%s', medium='%s', comment='%s']",
-                id, username, title, date, medium, comment);
+                "Experience[id=%s, username='%s', type='%s', moment='%s', location='%s', comment='%s']",
+                id, user.getUsername(), type.getDescription(), moment.toString(), location.getDescription(), comment);
     }
 }
