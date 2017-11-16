@@ -5,9 +5,11 @@ import culturelog.rest.domain.Experience;
 import culturelog.rest.domain.Moment;
 import culturelog.rest.domain.MomentType;
 import culturelog.rest.dto.ExperienceDto;
+import culturelog.rest.exception.CulturLogControllerExceptionKey;
 import culturelog.rest.exception.CultureLogException;
 import culturelog.rest.security.CultureLogSecurityService;
 import culturelog.rest.service.ExperienceService;
+import culturelog.rest.service.MessageService;
 import culturelog.rest.utils.ExperienceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * @author Jan Venstermans
@@ -31,9 +34,12 @@ public class ExperienceController {
     @Autowired
     private CultureLogSecurityService securityService;
 
+    @Autowired
+    private MessageService messageService;
+
     @RequestMapping(method = RequestMethod.POST)
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> createExperience(@RequestBody ExperienceDto experienceDto) {
+    public ResponseEntity<?> createExperience(@RequestBody ExperienceDto experienceDto, Locale locale) {
         Experience experience = ExperienceUtils.fromExperienceDto(experienceDto);
         if (experience.getId() != null) {
             return ResponseEntity.badRequest().body("Cannot create experience with id ");
@@ -43,7 +49,7 @@ public class ExperienceController {
             Experience newExperience = experienceService.save(experience);
             return ResponseEntity.ok(newExperience);
         } catch (CultureLogException e) {
-            return ResponseEntity.badRequest().body(e);
+            return ResponseEntity.badRequest().body(messageService.getControllerMessage(CulturLogControllerExceptionKey.LOCATIONS_CREATE, e, locale));
         }
     }
 //

@@ -2,9 +2,12 @@ package culturelog.rest.utils;
 
 
 import culturelog.rest.domain.DisplayDate;
+import culturelog.rest.domain.DisplayDateType;
 import culturelog.rest.dto.DisplayDateDto;
 
+import javax.validation.constraints.NotNull;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,6 +46,13 @@ public class DisplayDateUtils {
         displayDate.setId(displayDateDto.getId());
         displayDate.setType(displayDateDto.getType());
         displayDate.setDate(displayDateDto.getDate());
+        return displayDate;
+    }
+
+    public static DisplayDate createDisplayDate(@NotNull DisplayDateType type, @NotNull Date date) {
+        DisplayDate displayDate = new DisplayDate();
+        displayDate.setType(type);
+        displayDate.setDate(date);
         return displayDate;
     }
 }

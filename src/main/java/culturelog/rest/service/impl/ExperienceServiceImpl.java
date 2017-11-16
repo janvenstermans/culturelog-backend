@@ -40,6 +40,9 @@ public class ExperienceServiceImpl implements ExperienceService {
         if (experience.getName() == null) {
             throw new CultureLogException(CultureLogExceptionKey.EXPERIENCE_NEEDS_NAME_ATTRIBUTE);
         }
+        if (experience.getType() == null || experience.getType().getId() == null) {
+            throw new CultureLogException(CultureLogExceptionKey.EXPERIENCE_NEEDS_TYPE_ATTRIBUTE);
+        }
 //        if (CultureLogUtils.isNullOrEmpty(experience.getUsername())) {
 //            throw new CultureLogException("Cannot save experience with empty field username");
 //        }

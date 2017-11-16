@@ -11,6 +11,7 @@ public enum CultureLogExceptionKey {
     LOCATION_WITH_NAME_FOR_USER_ALREADY_EXISTS("locationWithNameForUserAlreadyExists"),
 
     EXPERIENCE_NEEDS_NAME_ATTRIBUTE("experience.nameRequired"),
+    EXPERIENCE_NEEDS_TYPE_ATTRIBUTE("experience.typeRequired"),
 
     USER_NULL("user.null"),
     USER_NOT_ENOUGH_DATA("user.notEnoughData"),
