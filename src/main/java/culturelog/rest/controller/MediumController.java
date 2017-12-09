@@ -5,6 +5,7 @@ import culturelog.rest.domain.User;
 import culturelog.rest.dto.MediumDto;
 import culturelog.rest.exception.CulturLogControllerExceptionKey;
 import culturelog.rest.exception.CultureLogException;
+import culturelog.rest.exception.CultureLogExceptionKey;
 import culturelog.rest.security.CultureLogSecurityService;
 import culturelog.rest.service.MediumService;
 import culturelog.rest.service.MessageService;
@@ -14,11 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Locale;
@@ -43,11 +40,12 @@ public class MediumController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createMedium(@RequestBody MediumDto mediumDto, Locale locale) {
         Medium medium = MediumUtils.fromMediumDto(mediumDto);
-        if (medium.getId() != null) {
-            return ResponseEntity.badRequest().body(messageService.getControllerMessage(CulturLogControllerExceptionKey.MEDIA_CREATE_WITH_ID, locale));
-        }
-        medium.setUser(securityService.getLoggedInUser());
         try {
+            if (medium.getId() != null) {
+                throw new CultureLogException(CultureLogExceptionKey.CREATE_WITH_ID);
+            }
+            medium.setUser(securityService.getLoggedInUser());
+
             Medium newMedium = mediumService.save(medium);
             return ResponseEntity.status(HttpStatus.CREATED).body(MediumUtils.toMediumDto(newMedium));
         } catch (CultureLogException e) {

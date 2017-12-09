@@ -4,6 +4,8 @@ package culturelog.rest.exception;
  * @author Jan Venstermans
  */
 public enum CultureLogExceptionKey {
+    CREATE_WITH_ID("createWithId"),
+
     MEDIUM_NEEDS_NAME_ATTRIBUTE("medium.nameRequired"),
     MEDIUM_WITH_NAME_FOR_USER_ALREADY_EXISTS("mediumWithNameForUserAlreadyExists"),
 
@@ -12,6 +14,7 @@ public enum CultureLogExceptionKey {
 
     EXPERIENCE_NEEDS_NAME_ATTRIBUTE("experience.nameRequired"),
     EXPERIENCE_NEEDS_TYPE_ATTRIBUTE("experience.typeRequired"),
+    EXPERIENCE_NEEDS_EXISTING_TYPE_ATTRIBUTE_FOR_USER("experience.typeRequired.existingForUser"),
 
     USER_NULL("user.null"),
     USER_NOT_ENOUGH_DATA("user.notEnoughData"),

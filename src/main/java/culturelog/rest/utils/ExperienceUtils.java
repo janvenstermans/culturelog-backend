@@ -35,7 +35,7 @@ public class ExperienceUtils {
         experienceDto.setType(MediumUtils.toMediumDto(experience.getType()));
         experienceDto.setMoment(MomentUtils.toMomentDto(experience.getMoment()));
         experienceDto.setLocation(LocationUtils.toLocationDto(experience.getLocation()));
-        experienceDto.setComment(experienceDto.getComment());
+        experienceDto.setComment(experience.getComment());
         return experienceDto;
     }
 

@@ -512,7 +512,7 @@ public class MediumControllerTest extends ControllerTestAbstract {
 
     // helper methods
 
-    private Medium createMediumToSave(String name, User user) {
+    public static Medium createMediumToSave(String name, User user) {
         Medium medium = new Medium();
         medium.setName(name);
         medium.setUser(user);

@@ -69,7 +69,8 @@ public class ExperienceDto {
     public String toString() {
         return String.format(
                 "ExperienceDto[id=%s, name='%s', type='%s', moment='%s', location='%s', comment='%s']",
-                id, name,
+                id,
+                name,
                 type != null ? type.getDescription() : "",
                 moment != null ? moment.toString() : "",
                 location != null ? location.getDescription() : "",

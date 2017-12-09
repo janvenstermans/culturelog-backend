@@ -1,13 +1,6 @@
 package culturelog.rest.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +24,7 @@ public class Moment {
     /**
      * All {@link DisplayDate}s linked to this moment. The type will imply the amount expected.
      */
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name="moment_display_date",
             joinColumns=@JoinColumn(name="moment_id", referencedColumnName="id"),

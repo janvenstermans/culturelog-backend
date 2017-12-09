@@ -5,6 +5,7 @@ import culturelog.rest.domain.User;
 import culturelog.rest.dto.LocationDto;
 import culturelog.rest.exception.CulturLogControllerExceptionKey;
 import culturelog.rest.exception.CultureLogException;
+import culturelog.rest.exception.CultureLogExceptionKey;
 import culturelog.rest.security.CultureLogSecurityService;
 import culturelog.rest.service.LocationService;
 import culturelog.rest.service.MessageService;
@@ -43,11 +44,12 @@ public class LocationController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createLocation(@RequestBody LocationDto locationDto, Locale locale) {
         Location location = LocationUtils.fromLocationDto(locationDto);
-        if (location.getId() != null) {
-            return ResponseEntity.badRequest().body("Cannot create location with id ");
-        }
-        location.setUser(securityService.getLoggedInUser());
         try {
+            if (location.getId() != null) {
+                throw new CultureLogException(CultureLogExceptionKey.CREATE_WITH_ID);
+            }
+            location.setUser(securityService.getLoggedInUser());
+
             Location newLocation = locationService.save(location);
             return ResponseEntity.status(HttpStatus.CREATED).body(LocationUtils.toLocationDto(newLocation));
         } catch (CultureLogException e) {
