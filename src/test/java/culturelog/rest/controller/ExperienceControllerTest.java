@@ -2,18 +2,18 @@ package culturelog.rest.controller;
 
 import culturelog.rest.CulturelogRestApplication;
 import culturelog.rest.configuration.CultureLogTestConfiguration;
-import culturelog.rest.domain.DisplayDateType;
-import culturelog.rest.domain.Medium;
-import culturelog.rest.domain.MomentType;
-import culturelog.rest.domain.User;
+import culturelog.rest.domain.*;
 import culturelog.rest.dto.DateMomentDto;
 import culturelog.rest.dto.ExperienceDto;
+import culturelog.rest.dto.LocationDto;
 import culturelog.rest.dto.MediumDto;
 import culturelog.rest.repository.ExperienceRepository;
+import culturelog.rest.repository.LocationRepository;
 import culturelog.rest.repository.MediumRepository;
 import culturelog.rest.repository.UserRepository;
 import culturelog.rest.service.MessageService;
 import culturelog.rest.utils.DisplayDateUtils;
+import culturelog.rest.utils.LocationUtils;
 import culturelog.rest.utils.MediumUtils;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
@@ -56,6 +56,9 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
 
     @Autowired
     private MediumRepository mediumRepository;
+
+    @Autowired
+    private LocationRepository locationRepository;
 
     @Autowired
     private MessageService messageService;
@@ -281,7 +284,7 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
     }
 
     @Test
-    public void testCreateExperience_onSuccess_doNotUpdateExperienceType() throws Exception {
+    public void testCreateExperience_onSuccess_doesNotUpdateExperienceType() throws Exception {
         Long filmTypeId = CultureLogTestConfiguration.getGlobalMediumIdFilm();
         Medium existingType = mediumRepository.findOne(filmTypeId);
         Assert.assertNotNull(existingType);
@@ -309,6 +312,114 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
 
         Medium existingTypeAfterCreation = mediumRepository.findOne(filmTypeId);
         Assert.assertEquals(existingTypeNameOriginal, existingTypeAfterCreation.getName());
+    }
+
+    // experience create: location optional checks
+
+    @Test
+    public void testCreateExperience_locationEmpty_fails() throws Exception {
+        Long filmTypeId = CultureLogTestConfiguration.getGlobalMediumIdFilm();
+        String experienceName = "Shakespeare in love";
+        ExperienceDto experienceDto = creatExperienceToSave(experienceName, filmTypeId);
+        experienceDto.setLocation(new LocationDto());
+
+        int experienceCountBefore = experienceRepository.findAll().size();
+
+        mockMvc.perform(post(URL_EXPERIENCES)
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
+                .content(this.json(experienceDto))
+                .contentType(contentType))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+        ;
+
+        int experienceCountAfter = experienceRepository.findAll().size();
+        assertEquals(experienceCountBefore, experienceCountAfter);
+    }
+
+    @Test
+    public void testCreateExperience_locationGlobal_success() throws Exception {
+        Long filmTypeId = CultureLogTestConfiguration.getGlobalMediumIdFilm();
+        String experienceName = "Shakespeare in love";
+        ExperienceDto experienceDto = creatExperienceToSave(experienceName, filmTypeId);
+        Long locationGlobalId = CultureLogTestConfiguration.getGlobalLocationIdVooruit();
+        Location locationGlobal = locationRepository.findOne(locationGlobalId);
+        experienceDto.setLocation(LocationUtils.toLocationDto(locationGlobal));
+
+        int experienceCountBefore = experienceRepository.findAll().size();
+
+        mockMvc.perform(post(URL_EXPERIENCES)
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
+                .content(this.json(experienceDto))
+                .contentType(contentType))
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.location", Matchers.notNullValue()))
+                .andExpect(jsonPath("$.location.id", Matchers.equalTo(locationGlobalId.intValue())))
+        ;
+
+        int experienceCountAfter = experienceRepository.findAll().size();
+        assertEquals(experienceCountBefore + 1, experienceCountAfter);
+    }
+
+    @Test
+    public void testCreateExperience_locationOwn_success_doesNotUpdateLocation() throws Exception {
+        Long filmTypeId = CultureLogTestConfiguration.getGlobalMediumIdFilm();
+        String experienceName = "Shakespeare in love";
+        ExperienceDto experienceDto = creatExperienceToSave(experienceName, filmTypeId);
+        User user1 = userRepository.findOne(CultureLogTestConfiguration.getUser1Id());
+        Long locationOwnId = locationRepository.save(LocationControllerTest.createLocationToSave("testOne", user1)).getId();
+        Location locationOwn = locationRepository.findOne(locationOwnId);
+        experienceDto.setLocation(LocationUtils.toLocationDto(locationOwn));
+        String existingLocationNameOriginal = locationOwn.getName();
+        String existingLocationNameAlteration = existingLocationNameOriginal + "Alter";
+        experienceDto.setLocation(new LocationDto());
+        experienceDto.getLocation().setId(locationOwnId);
+        experienceDto.getLocation().setName(existingLocationNameAlteration);
+
+        int experienceCountBefore = experienceRepository.findAll().size();
+
+        mockMvc.perform(post(URL_EXPERIENCES)
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
+                .content(this.json(experienceDto))
+                .contentType(contentType))
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.location", Matchers.notNullValue()))
+                .andExpect(jsonPath("$.location.id", Matchers.equalTo(locationOwnId.intValue())))
+                .andExpect(jsonPath("$.location.name", Matchers.equalTo(existingLocationNameOriginal)))
+        ;
+
+        int experienceCountAfter = experienceRepository.findAll().size();
+        assertEquals(experienceCountBefore + 1, experienceCountAfter);
+
+        Location existingLocationAfterCreation = locationRepository.findOne(locationOwnId);
+        Assert.assertEquals(existingLocationNameOriginal, existingLocationAfterCreation.getName());
+    }
+
+    @Test
+    public void testCreateExperience_locationOfOtherUser_fails() throws Exception {
+        Long filmTypeId = CultureLogTestConfiguration.getGlobalMediumIdFilm();
+        String experienceName = "Shakespeare in love";
+        ExperienceDto experienceDto = creatExperienceToSave(experienceName, filmTypeId);
+        User user2 = userRepository.findOne(CultureLogTestConfiguration.getUser2Id());
+        Long locationOwnId = locationRepository.save(LocationControllerTest.createLocationToSave("testTwo", user2)).getId();
+        experienceDto.setLocation(LocationUtils.toLocationDto(locationRepository.findOne(locationOwnId)));
+
+        int experienceCountBefore = experienceRepository.findAll().size();
+
+        mockMvc.perform(post(URL_EXPERIENCES)
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
+                .content(this.json(experienceDto))
+                .contentType(contentType))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+        ;
+
+        int experienceCountAfter = experienceRepository.findAll().size();
+        assertEquals(experienceCountBefore, experienceCountAfter);
     }
 
     // helper methods

@@ -4,8 +4,8 @@ import culturelog.rest.domain.*;
 import culturelog.rest.exception.CultureLogException;
 import culturelog.rest.exception.CultureLogExceptionKey;
 import culturelog.rest.repository.ExperienceRepository;
+import culturelog.rest.repository.LocationRepository;
 import culturelog.rest.repository.MediumRepository;
-import culturelog.rest.repository.MomentRepository;
 import culturelog.rest.service.ExperienceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +27,9 @@ public class ExperienceServiceImpl implements ExperienceService {
     @Autowired
     private MediumRepository mediumRepository;
 
+    @Autowired
+    private LocationRepository locationRepository;
+
     public Experience save(Experience experience) throws CultureLogException {
         checkRequiredFieldsForSave(experience);
         // first save moment
@@ -47,6 +50,29 @@ public class ExperienceServiceImpl implements ExperienceService {
             throw new CultureLogException(CultureLogExceptionKey.EXPERIENCE_NEEDS_NAME_ATTRIBUTE);
         }
 
+        checkTypeFieldForSave(experience);
+
+        checkLocationFieldForSave(experience);
+
+//        if (CultureLogUtils.isNullOrEmpty(experience.getUsername())) {
+//            throw new CultureLogException("Cannot save experience with empty field username");
+//        }
+//        if (CultureLogUtils.isNullOrEmpty(experience.getTitle())) {
+//            throw new CultureLogException("Cannot save experience with empty field title");
+//        }
+//        if (experience.getDate() == null) {
+//            throw new CultureLogException("Cannot save experience with empty field date");
+//        }
+        //default fallback for the moment: type date, displaytype DATE
+        if (experience.getMoment() == null) {
+            Moment moment = new Moment();
+            moment.setType(MomentType.DATE);
+            moment.setDisplayDates(Collections.singletonList(new DisplayDate()));
+            experience.setMoment(moment);
+        }
+    }
+
+    private void checkTypeFieldForSave(@NotNull Experience experience) throws CultureLogException {
         //type required
         if (experience.getType() == null || experience.getType().getId() == null) {
             throw new CultureLogException(CultureLogExceptionKey.EXPERIENCE_NEEDS_TYPE_ATTRIBUTE);
@@ -68,22 +94,33 @@ public class ExperienceServiceImpl implements ExperienceService {
 
         }
         experience.setType(experienceType);
+    }
 
-//        if (CultureLogUtils.isNullOrEmpty(experience.getUsername())) {
-//            throw new CultureLogException("Cannot save experience with empty field username");
-//        }
-//        if (CultureLogUtils.isNullOrEmpty(experience.getTitle())) {
-//            throw new CultureLogException("Cannot save experience with empty field title");
-//        }
-//        if (experience.getDate() == null) {
-//            throw new CultureLogException("Cannot save experience with empty field date");
-//        }
-        //default fallback for the moment: type date, displaytype DATE
-        if (experience.getMoment() == null) {
-            Moment moment = new Moment();
-            moment.setType(MomentType.DATE);
-            moment.setDisplayDates(Collections.singletonList(new DisplayDate()));
-            experience.setMoment(moment);
+    private void checkLocationFieldForSave(@NotNull Experience experience) throws CultureLogException {
+        //type option
+        if (experience.getLocation() == null) {
+            return;
         }
+        Long locationId = experience.getLocation().getId();
+        if (locationId == null) {
+            throw new CultureLogException(CultureLogExceptionKey.EXPERIENCE_OPTIONAL_LOCATION_ATTRIBUTE_ID_REQUIRED);
+        }
+        Location location = locationRepository.findOne(locationId);
+        if (location == null) {
+            throw new CultureLogException(CultureLogExceptionKey.EXPERIENCE_OPTIONAL_LOCATION_NOT_FOUND_FOR_USER, new Object[]{locationId});
+        }
+        if (experience.getUser() == null && location.getUser() != null) {
+            // experience is global, but the type is not
+            //TODO: test
+            throw new CultureLogException(CultureLogExceptionKey.EXPERIENCE_OPTIONAL_LOCATION_NOT_FOUND_FOR_USER, new Object[]{locationId});
+        }
+        if (experience.getUser() != null && location.getUser() != null) {
+            // both experience and type are not global: users must be same
+            if (experience.getUser().getId() != location.getUser().getId()) {
+                throw new CultureLogException(CultureLogExceptionKey.EXPERIENCE_OPTIONAL_LOCATION_NOT_FOUND_FOR_USER, new Object[]{locationId});
+            }
+
+        }
+        experience.setLocation(location);
     }
 }

@@ -511,7 +511,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
 
     // helper methods
 
-    private Location createLocationToSave(String name, User user) {
+    public static Location createLocationToSave(String name, User user) {
         Location location = new Location();
         location.setName(name);
         location.setUser(user);

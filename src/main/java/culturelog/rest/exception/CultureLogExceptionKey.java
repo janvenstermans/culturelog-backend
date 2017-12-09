@@ -15,6 +15,8 @@ public enum CultureLogExceptionKey {
     EXPERIENCE_NEEDS_NAME_ATTRIBUTE("experience.nameRequired"),
     EXPERIENCE_NEEDS_TYPE_ATTRIBUTE("experience.typeRequired"),
     EXPERIENCE_NEEDS_EXISTING_TYPE_ATTRIBUTE_FOR_USER("experience.typeRequired.existingForUser"),
+    EXPERIENCE_OPTIONAL_LOCATION_ATTRIBUTE_ID_REQUIRED("experience.locationOptional.idRequired"),
+    EXPERIENCE_OPTIONAL_LOCATION_NOT_FOUND_FOR_USER("experience.locationOptional.notExistingForUser"),
 
     USER_NULL("user.null"),
     USER_NOT_ENOUGH_DATA("user.notEnoughData"),
