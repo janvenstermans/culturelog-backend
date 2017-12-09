@@ -76,3 +76,9 @@ mongod
 # SASS generated files
 # =========
 public/css/sass
+
+
+# maven
+# =========
+target
+
