@@ -1,11 +1,13 @@
 package culturelog.rest.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import culturelog.rest.domain.MomentType;
 
 /**
  * Dto format{@link culturelog.rest.domain.Moment} of type {@link culturelog.rest.domain.MomentType#DATE}.
  * @author Jan Venstermans
  */
+@JsonDeserialize(as = DateMomentDto.class) // to avoid cyclic deserialization
 public class DateMomentDto extends MomentDto {
 
     private DisplayDateDto displayDate;
