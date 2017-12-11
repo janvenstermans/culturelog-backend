@@ -1,8 +1,10 @@
 package culturelog.rest.domain;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -21,10 +23,13 @@ public class Moment {
     @NotNull
     private MomentType type = MomentType.DATE;
 
+    @NotNull
+    private Date sortDate;
+
     /**
      * All {@link DisplayDate}s linked to this moment. The type will imply the amount expected.
      */
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(
             name="moment_display_date",
             joinColumns=@JoinColumn(name="moment_id", referencedColumnName="id"),
@@ -47,6 +52,14 @@ public class Moment {
         this.type = type;
     }
 
+    public Date getSortDate() {
+        return sortDate;
+    }
+
+    public void setSortDate(Date sortDate) {
+        this.sortDate = sortDate;
+    }
+
     public List<DisplayDate> getDisplayDates() {
         return displayDates;
     }
@@ -58,7 +71,7 @@ public class Moment {
     @Override
     public String toString() {
         return String.format(
-                "Moment[id=%s, type='%s', displayDatesCount='%s']",
-                id, type, displayDates != null ? displayDates.size() : 0);
+                "Moment[id=%s, type='%s', sortDate=%s, displayDatesCount='%s']",
+                id, type, sortDate, displayDates != null ? displayDates.size() : 0);
     }
 }

@@ -8,6 +8,8 @@ import culturelog.rest.repository.LocationRepository;
 import culturelog.rest.repository.MediumRepository;
 import culturelog.rest.service.ExperienceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,15 +34,14 @@ public class ExperienceServiceImpl implements ExperienceService {
 
     public Experience save(Experience experience) throws CultureLogException {
         checkRequiredFieldsForSave(experience);
-        // first save moment
-//        experience.setMoment(momentRepository.save(experience.getMoment()));
         return experienceRepository.save(experience);
     }
-//
-//    public List<Experience> getExperiencesOfUser(String username) {
-//        return experienceRepository.findByUsername(username);
-//    }
-//
+
+    @Override
+    public Page<Experience> getExperiencesOfUser(Long userId, Pageable pageable) {
+        return experienceRepository.findByUserId(userId, pageable);
+    }
+
 //    public Experience getById(Long experienceId) {
 //        return experienceRepository.findOne(experienceId);
 //    }
@@ -54,21 +55,16 @@ public class ExperienceServiceImpl implements ExperienceService {
 
         checkLocationFieldForSave(experience);
 
-//        if (CultureLogUtils.isNullOrEmpty(experience.getUsername())) {
-//            throw new CultureLogException("Cannot save experience with empty field username");
-//        }
-//        if (CultureLogUtils.isNullOrEmpty(experience.getTitle())) {
-//            throw new CultureLogException("Cannot save experience with empty field title");
-//        }
-//        if (experience.getDate() == null) {
-//            throw new CultureLogException("Cannot save experience with empty field date");
-//        }
         //default fallback for the moment: type date, displaytype DATE
         if (experience.getMoment() == null) {
             Moment moment = new Moment();
             moment.setType(MomentType.DATE);
             moment.setDisplayDates(Collections.singletonList(new DisplayDate()));
             experience.setMoment(moment);
+        }
+        Moment moment = experience.getMoment();
+        if (moment.getSortDate() == null) {
+            moment.setSortDate(moment.getDisplayDates().get(0).getDate());
         }
     }
 

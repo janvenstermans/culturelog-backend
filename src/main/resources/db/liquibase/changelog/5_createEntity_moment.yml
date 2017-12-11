@@ -46,6 +46,11 @@ databaseChangeLog:
               - column:
                   name: user_id
                   type: int
+              - column:
+                  name: sortDate
+                  type: date
+                  constraints:
+                    nullable: false
         - createTable:
             tableName: moment_display_date
             schemaName: culturelog

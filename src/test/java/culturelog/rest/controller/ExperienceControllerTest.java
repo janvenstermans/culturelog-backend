@@ -1,41 +1,72 @@
 package culturelog.rest.controller;
 
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.ReadContext;
 import culturelog.rest.CulturelogRestApplication;
 import culturelog.rest.configuration.CultureLogTestConfiguration;
-import culturelog.rest.domain.*;
+import culturelog.rest.domain.DisplayDate;
+import culturelog.rest.domain.DisplayDateType;
+import culturelog.rest.domain.Experience;
+import culturelog.rest.domain.Location;
+import culturelog.rest.domain.Medium;
+import culturelog.rest.domain.Moment;
+import culturelog.rest.domain.MomentType;
+import culturelog.rest.domain.User;
 import culturelog.rest.dto.DateMomentDto;
 import culturelog.rest.dto.ExperienceDto;
 import culturelog.rest.dto.LocationDto;
 import culturelog.rest.dto.MediumDto;
+import culturelog.rest.exception.CultureLogException;
 import culturelog.rest.repository.ExperienceRepository;
 import culturelog.rest.repository.LocationRepository;
 import culturelog.rest.repository.MediumRepository;
 import culturelog.rest.repository.UserRepository;
+import culturelog.rest.service.ExperienceService;
 import culturelog.rest.service.MessageService;
 import culturelog.rest.utils.DisplayDateUtils;
 import culturelog.rest.utils.LocationUtils;
 import culturelog.rest.utils.MediumUtils;
-import org.hamcrest.Matchers;
+import net.minidev.json.JSONArray;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
+import static culturelog.rest.controller.LocationControllerTest.createLocationToSave;
 import static culturelog.rest.controller.MediumControllerTest.createMediumToSave;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test class for {@link ExperienceController}.
@@ -61,6 +92,9 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
     private LocationRepository locationRepository;
 
     @Autowired
+    private ExperienceService experienceService;
+
+    @Autowired
     private MessageService messageService;
 
     private static final String URL_EXPERIENCES = "/experiences";
@@ -70,10 +104,12 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
 
     @Test
     public void testLocationsUrl_allowedMethods() throws Exception {
-        testUrlAllowedMethods(URL_EXPERIENCES, HttpMethod.POST);
+        testUrlAllowedMethods(URL_EXPERIENCES, HttpMethod.POST, HttpMethod.GET);
     }
 
+    // -------------------------
     // experiences POST
+    // -------------------------
 
     @Test
     public void testCreateExperience_notAuthorized() throws Exception {
@@ -220,19 +256,19 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
                 .contentType(contentType))
                 .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", Matchers.notNullValue()))
-                .andExpect(jsonPath("$.name", Matchers.equalTo(experienceName)))
-                .andExpect(jsonPath("$.type.id", Matchers.equalTo(filmTypeId.intValue())))
-                .andExpect(jsonPath("$.moment", Matchers.notNullValue()))
-                .andExpect(jsonPath("$.moment.id", Matchers.notNullValue()))
-                .andExpect(jsonPath("$.moment.momentType", Matchers.equalTo(MomentType.DATE.name())))
-                .andExpect(jsonPath("$.moment.displayDate", Matchers.notNullValue()))
-                .andExpect(jsonPath("$.moment.displayDate.id", Matchers.notNullValue()))
-                .andExpect(jsonPath("$.moment.displayDate.type", Matchers.equalTo(DisplayDateType.DATE.name())))
-                .andExpect(jsonPath("$.moment.displayDate.date", Matchers.greaterThan(minCreateDateTime)))
-                .andExpect(jsonPath("$.moment.displayDate.date", Matchers.lessThan(new Date().getTime())))
-                .andExpect(jsonPath("$.location", Matchers.nullValue()))
-                .andExpect(jsonPath("$.comment", Matchers.nullValue()))
+                .andExpect(jsonPath("$.id", notNullValue()))
+                .andExpect(jsonPath("$.name", equalTo(experienceName)))
+                .andExpect(jsonPath("$.type.id", equalTo(filmTypeId.intValue())))
+                .andExpect(jsonPath("$.moment", notNullValue()))
+                .andExpect(jsonPath("$.moment.id", notNullValue()))
+                .andExpect(jsonPath("$.moment.momentType", equalTo(MomentType.DATE.name())))
+                .andExpect(jsonPath("$.moment.displayDate", notNullValue()))
+                .andExpect(jsonPath("$.moment.displayDate.id", notNullValue()))
+                .andExpect(jsonPath("$.moment.displayDate.type", equalTo(DisplayDateType.DATE.name())))
+                .andExpect(jsonPath("$.moment.displayDate.date", greaterThan(minCreateDateTime)))
+                .andExpect(jsonPath("$.moment.displayDate.date", lessThan(new Date().getTime())))
+                .andExpect(jsonPath("$.location", nullValue()))
+                .andExpect(jsonPath("$.comment", nullValue()))
         ;
 
         int experienceCountAfter = experienceRepository.findAll().size();
@@ -248,10 +284,7 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
         ExperienceDto experienceDto = creatExperienceToSave(experienceName, customExperienceTypeId);
         experienceDto.setComment(experienceComment);
         //create datemoment before
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date());
-        cal.add(Calendar.DATE, -1);
-        Date dateYesterday = cal.getTime();
+        Date dateYesterday = createDateRelativeToToday(-1);
         DateMomentDto dateMomentDto = new DateMomentDto();
         dateMomentDto.setDisplayDate(DisplayDateUtils.toDisplayDateDto(
                 DisplayDateUtils.createDisplayDate(DisplayDateType.DATE_TIME, dateYesterday)));
@@ -265,18 +298,18 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
                 .contentType(contentType))
                 .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", Matchers.notNullValue()))
-                .andExpect(jsonPath("$.name", Matchers.equalTo(experienceName)))
-                .andExpect(jsonPath("$.type.id", Matchers.equalTo(customExperienceTypeId.intValue())))
-                .andExpect(jsonPath("$.moment", Matchers.notNullValue()))
-                .andExpect(jsonPath("$.moment.id", Matchers.notNullValue()))
-                .andExpect(jsonPath("$.moment.momentType", Matchers.equalTo(MomentType.DATE.name())))
-                .andExpect(jsonPath("$.moment.displayDate", Matchers.notNullValue()))
-                .andExpect(jsonPath("$.moment.displayDate.id", Matchers.notNullValue()))
-                .andExpect(jsonPath("$.moment.displayDate.type", Matchers.equalTo(dateMomentDto.getDisplayDate().getType().name())))
-                .andExpect(jsonPath("$.moment.displayDate.date", Matchers.equalTo(dateYesterday.getTime())))
-                .andExpect(jsonPath("$.location", Matchers.nullValue()))
-                .andExpect(jsonPath("$.comment", Matchers.equalTo(experienceComment)))
+                .andExpect(jsonPath("$.id", notNullValue()))
+                .andExpect(jsonPath("$.name", equalTo(experienceName)))
+                .andExpect(jsonPath("$.type.id", equalTo(customExperienceTypeId.intValue())))
+                .andExpect(jsonPath("$.moment", notNullValue()))
+                .andExpect(jsonPath("$.moment.id", notNullValue()))
+                .andExpect(jsonPath("$.moment.momentType", equalTo(MomentType.DATE.name())))
+                .andExpect(jsonPath("$.moment.displayDate", notNullValue()))
+                .andExpect(jsonPath("$.moment.displayDate.id", notNullValue()))
+                .andExpect(jsonPath("$.moment.displayDate.type", equalTo(dateMomentDto.getDisplayDate().getType().name())))
+                .andExpect(jsonPath("$.moment.displayDate.date", equalTo(dateYesterday.getTime())))
+                .andExpect(jsonPath("$.location", nullValue()))
+                .andExpect(jsonPath("$.comment", equalTo(experienceComment)))
         ;
 
         int experienceCountAfter = experienceRepository.findAll().size();
@@ -304,7 +337,7 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
                 .contentType(contentType))
                 .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.type.name", Matchers.equalTo(existingTypeNameOriginal)))
+                .andExpect(jsonPath("$.type.name", equalTo(existingTypeNameOriginal)))
         ;
 
         int experienceCountAfter = experienceRepository.findAll().size();
@@ -355,8 +388,8 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
                 .contentType(contentType))
                 .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.location", Matchers.notNullValue()))
-                .andExpect(jsonPath("$.location.id", Matchers.equalTo(locationGlobalId.intValue())))
+                .andExpect(jsonPath("$.location", notNullValue()))
+                .andExpect(jsonPath("$.location.id", equalTo(locationGlobalId.intValue())))
         ;
 
         int experienceCountAfter = experienceRepository.findAll().size();
@@ -369,7 +402,7 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
         String experienceName = "Shakespeare in love";
         ExperienceDto experienceDto = creatExperienceToSave(experienceName, filmTypeId);
         User user1 = userRepository.findOne(CultureLogTestConfiguration.getUser1Id());
-        Long locationOwnId = locationRepository.save(LocationControllerTest.createLocationToSave("testOne", user1)).getId();
+        Long locationOwnId = locationRepository.save(createLocationToSave("testOne", user1)).getId();
         Location locationOwn = locationRepository.findOne(locationOwnId);
         experienceDto.setLocation(LocationUtils.toLocationDto(locationOwn));
         String existingLocationNameOriginal = locationOwn.getName();
@@ -386,9 +419,9 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
                 .contentType(contentType))
                 .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.location", Matchers.notNullValue()))
-                .andExpect(jsonPath("$.location.id", Matchers.equalTo(locationOwnId.intValue())))
-                .andExpect(jsonPath("$.location.name", Matchers.equalTo(existingLocationNameOriginal)))
+                .andExpect(jsonPath("$.location", notNullValue()))
+                .andExpect(jsonPath("$.location.id", equalTo(locationOwnId.intValue())))
+                .andExpect(jsonPath("$.location.name", equalTo(existingLocationNameOriginal)))
         ;
 
         int experienceCountAfter = experienceRepository.findAll().size();
@@ -404,7 +437,7 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
         String experienceName = "Shakespeare in love";
         ExperienceDto experienceDto = creatExperienceToSave(experienceName, filmTypeId);
         User user2 = userRepository.findOne(CultureLogTestConfiguration.getUser2Id());
-        Long locationOwnId = locationRepository.save(LocationControllerTest.createLocationToSave("testTwo", user2)).getId();
+        Long locationOwnId = locationRepository.save(createLocationToSave("testTwo", user2)).getId();
         experienceDto.setLocation(LocationUtils.toLocationDto(locationRepository.findOne(locationOwnId)));
 
         int experienceCountBefore = experienceRepository.findAll().size();
@@ -422,6 +455,105 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
         assertEquals(experienceCountBefore, experienceCountAfter);
     }
 
+    // -----------------------------------------
+    // url /experiences?page=X&size=Y GET
+    // -----------------------------------------
+
+    @Test
+    public void testGetExperiences_notAuthorized() throws Exception {
+        mockMvc.perform(get(URL_EXPERIENCES))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void testGetExperiences_noOwnExperiences() throws Exception {
+        int page = 0;
+        int size = 3;
+        Pageable pageable = new PageRequest(page, size);
+        Page experienceListUser = experienceRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), pageable);
+        Assert.assertEquals(0L, experienceListUser.getTotalElements());
+        List<Long> expectedIdList = Collections.emptyList();
+
+        executeAndAssertGetExperiencesPage(page, size, null, false, expectedIdList, experienceListUser);
+    }
+
+    @Test
+    public void testGetExperiences_defaultPagingInfo() throws Exception {
+        String direction0 = ExperienceController.DEFAULT_SORT_ASC ? Sort.Direction.ASC.name() : Sort.Direction.DESC.name();
+        mockMvc.perform(get(URL_EXPERIENCES)
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.number", equalTo(ExperienceController.DEFAULT_PAGE_NUMBER)))
+                .andExpect(jsonPath("$.size", equalTo(ExperienceController.DEFAULT_PAGE_SIZE)))
+                .andExpect(jsonPath("$.sort", hasSize(1)))
+                .andExpect(jsonPath("$.sort[0].property", equalTo(ExperienceController.DEFAULT_SORT_COLUMN)))
+                .andExpect(jsonPath("$.sort[0].direction", equalTo(direction0)))
+                .andExpect(jsonPath("$.sort[0].ascending", equalTo(ExperienceController.DEFAULT_SORT_ASC)))
+                ;
+    }
+
+    @Test
+    public void testGetLocations_withOwnExperiences() throws Exception {
+        //key: moment sortDate, value: savedExperience
+        TreeMap<Date, Experience> savedExperiences = createExperiencesForUser(CultureLogTestConfiguration.getUser1Id());
+
+        int pageSize = 3;
+        String sort = null; //default
+        Page<Experience> experiencePage0 = experienceRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, pageSize));
+        Page<Experience> experiencePage1 = experienceRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(1, pageSize));
+
+        //determine ids in pages
+        List<Long> experienceIdsSortedBySortDateDesc = savedExperiences.values().stream().map(experience -> experience.getId()).collect(Collectors.toList());
+        Collections.reverse(experienceIdsSortedBySortDateDesc);
+        List<Long> expectedIdListPage0 = experienceIdsSortedBySortDateDesc.subList(0, 3);
+        List<Long> expectedIdListPage1 = experienceIdsSortedBySortDateDesc.subList(3, 5);
+
+        executeAndAssertGetExperiencesPage(0, pageSize, sort, false, expectedIdListPage0, experiencePage0);
+        executeAndAssertGetExperiencesPage(1, pageSize, sort, false, expectedIdListPage1, experiencePage1);
+    }
+
+    @Test
+    public void testGetLocations_withOwnExperiences_sortByExperienceIdAsc() throws Exception {
+        //key: moment sortDate, value: savedExperience
+        TreeMap<Date, Experience> savedExperiences = createExperiencesForUser(CultureLogTestConfiguration.getUser1Id());
+
+        int pageSize = 3;
+        String sort = "id";
+        Page<Experience> experiencePage0 = experienceRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, pageSize));
+        Page<Experience> experiencePage1 = experienceRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(1, pageSize));
+
+        //determine ids in pages
+        List<Long> experienceIdsSortedByExperienceAsc = savedExperiences.values().stream().map(experience -> experience.getId()).collect(Collectors.toList());
+        Collections.sort(experienceIdsSortedByExperienceAsc);
+        List<Long> expectedIdListPage0 = experienceIdsSortedByExperienceAsc.subList(0, 3);
+        List<Long> expectedIdListPage1 = experienceIdsSortedByExperienceAsc.subList(3, 5);
+
+        executeAndAssertGetExperiencesPage(0, pageSize, sort, false, expectedIdListPage0, experiencePage0);
+        executeAndAssertGetExperiencesPage(1, pageSize, sort, false, expectedIdListPage1, experiencePage1);
+    }
+
+    @Test
+    public void testGetLocations_withOwnExperiences_sortByExperienceIdDesc() throws Exception {
+        //key: moment sortDate, value: savedExperience
+        TreeMap<Date, Experience> savedExperiences = createExperiencesForUser(CultureLogTestConfiguration.getUser1Id());
+
+        int pageSize = 3;
+        String sort = "id";
+        Page<Experience> experiencePage0 = experienceRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, pageSize));
+        Page<Experience> experiencePage1 = experienceRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(1, pageSize));
+
+        //determine ids in pages
+        List<Long> experienceIdsSortedByExperienceAsc = savedExperiences.values().stream().map(experience -> experience.getId()).collect(Collectors.toList());
+        Collections.sort(experienceIdsSortedByExperienceAsc);
+        Collections.reverse(experienceIdsSortedByExperienceAsc);
+        List<Long> expectedIdListPage0 = experienceIdsSortedByExperienceAsc.subList(0, 3);
+        List<Long> expectedIdListPage1 = experienceIdsSortedByExperienceAsc.subList(3, 5);
+
+        executeAndAssertGetExperiencesPage(0, pageSize, sort, true, expectedIdListPage0, experiencePage0);
+        executeAndAssertGetExperiencesPage(1, pageSize, sort, true, expectedIdListPage1, experiencePage1);
+    }
+
     // helper methods
 
     private ExperienceDto creatExperienceToSave(String name, Long mediumId) {
@@ -432,5 +564,139 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
             experience.setType(MediumUtils.toMediumDto(medium));
         }
         return experience;
+    }
+
+    private static String getUrlExperiencesPaged(Integer page, Integer size, String sort, boolean desc) {
+        if (page == null && size == null && sort == null) {
+            return URL_EXPERIENCES;
+        }
+        StringBuilder stringBuilder = new StringBuilder(URL_EXPERIENCES).append('?');
+        if (page != null) {
+            stringBuilder.append("page=").append(page).append('&');
+        }
+        if (size != null) {
+            stringBuilder.append("size=").append(size).append('&');
+        }
+        if (sort != null) {
+            stringBuilder.append("sort=").append(sort);
+            if (desc) {
+                stringBuilder.append(",desc");
+            }
+            stringBuilder.append('&');
+        }
+        stringBuilder.setLength(stringBuilder.length() - 1);
+        return stringBuilder.toString();
+    }
+
+    private void assertExperience(Experience experience, JSONArray jsonPathResult) {
+        Assert.assertNotNull(experience);
+        Assert.assertNotNull(jsonPathResult);
+        Assert.assertEquals(1, jsonPathResult.size());
+        Map<String, Object> locationJson = (Map<String, Object>) jsonPathResult.get(0);
+        assertExperienceJson(experience, locationJson);
+    }
+
+    private void assertExperienceJson(Experience experience, Map<String, Object> experienceJson) {
+        Assert.assertNotNull(experience);
+        Assert.assertNotNull(experienceJson);
+        Assert.assertEquals(experience.getId().longValue(), ((Number) experienceJson.get("id")).longValue());
+        Assert.assertEquals(experience.getName(), experienceJson.get("name"));
+        Assert.assertEquals(experience.getType().getId().longValue(), ((Number) ((Map<String, Object>) experienceJson.get("type")).get("id")).longValue());
+        Assert.assertEquals(experience.getMoment().getId().longValue(), ((Number) ((Map<String, Object>) experienceJson.get("moment")).get("id")).longValue());
+        if (experience.getLocation() == null) {
+            Assert.assertNull(experienceJson.get("location"));
+        } else {
+            Assert.assertEquals(experience.getLocation().getId().longValue(), ((Number) ((Map<String, Object>) experienceJson.get("location")).get("id")).longValue());
+        }
+        Assert.assertEquals(experience.getComment(), experienceJson.get("comment"));
+    }
+
+    public Experience createExperienceToSave(String name, User user, Long mediumId, Long locationId, Moment moment, String comment) {
+        Experience experience = new Experience();
+        experience.setName(name);
+        experience.setUser(user);
+        if (mediumId != null) {
+            experience.setType(mediumRepository.findOne(mediumId));
+        }
+        if (locationId != null) {
+            experience.setLocation(locationRepository.findOne(locationId));
+        }
+        experience.setMoment(moment);
+        experience.setComment(comment);
+        return experience;
+    }
+
+    public static Moment createDateMoment(DisplayDateType displayDateType, int dateRelativeToToday) {
+        Moment moment = new Moment();
+        moment.setType(MomentType.DATE);
+        DisplayDate displayDate = new DisplayDate();
+        displayDate.setType(displayDateType);
+        displayDate.setDate(createDateRelativeToToday(dateRelativeToToday));
+        moment.setDisplayDates(Collections.singletonList(displayDate));
+        return moment;
+    }
+
+    public static Date createDateRelativeToToday(int dateRelativeToToday) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.add(Calendar.DATE, dateRelativeToToday);
+        return cal.getTime();
+    }
+
+    private void executeAndAssertGetExperiencesPage(int page, int pageSize, String sort, boolean desc, List<Long> expectedIdList, Page pageInfoExpected) throws Exception {
+        MvcResult resultPage = mockMvc.perform(get(getUrlExperiencesPaged(page, pageSize, sort, desc))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.content", hasSize(expectedIdList.size())))
+                //paging info
+                .andExpect(jsonPath("$.totalElements", equalTo((int) pageInfoExpected.getTotalElements())))
+                .andExpect(jsonPath("$.totalPages", equalTo(pageInfoExpected.getTotalPages())))
+                .andExpect(jsonPath("$.first", equalTo(pageInfoExpected.isFirst())))
+                .andExpect(jsonPath("$.last", equalTo(pageInfoExpected.isLast())))
+                .andExpect(jsonPath("$.number", equalTo(pageInfoExpected.getNumber())))
+                .andExpect(jsonPath("$.numberOfElements", equalTo(pageInfoExpected.getNumberOfElements())))
+                .andExpect(jsonPath("$.size", equalTo(pageInfoExpected.getSize())))
+                .andReturn();
+
+        ReadContext ctx = JsonPath.parse(resultPage.getResponse().getContentAsString());
+        // test all experience id's are present
+        assertIdList(expectedIdList, ctx.read("$.content[*].id"));
+        for (Long expectedId : expectedIdList) {
+            assertExperience(experienceRepository.findOne(expectedId), ctx.read(String.format("$.content.[?(@.id==%d)]", expectedId)));
+        }
+    }
+
+    private void saveExperience(Experience experienceToSave, Map<Date, Experience> savedExperiences) throws CultureLogException {
+        Experience experience = experienceService.save(experienceToSave);
+        savedExperiences.put(experience.getMoment().getSortDate(), experience);
+    }
+
+    /**
+     *
+     * @param userId
+     * @return key: moment sortDate, value: savedExperience
+     * @throws CultureLogException
+     */
+    private TreeMap<Date, Experience> createExperiencesForUser(Long userId) throws CultureLogException {
+        User user1 = userRepository.findOne(userId);
+        Long mediumFilmId = CultureLogTestConfiguration.getGlobalMediumIdFilm();
+        Long mediumBookId = CultureLogTestConfiguration.getGlobalMediumIdBook();
+        Long mediumTheaterId = mediumRepository.save(createMediumToSave("theaterCommon", user1)).getId();
+        Long locationKinepolisId = CultureLogTestConfiguration.getGlobalLocationIdKinepolis();
+        Long locationThuisId = locationRepository.save(createLocationToSave("thuis", user1)).getId();
+        //key: moment sortDate, value: savedExperience
+        TreeMap<Date, Experience> savedExperiences = new TreeMap<>();
+        saveExperience(createExperienceToSave("testOne", user1, mediumFilmId, locationKinepolisId,
+                createDateMoment(DisplayDateType.DATE, 0), "ok"), savedExperiences);
+        saveExperience(createExperienceToSave("testTwo", user1, mediumTheaterId, null,
+                createDateMoment(DisplayDateType.DATE_TIME, 2), "like this"), savedExperiences);
+        saveExperience(createExperienceToSave("testThree", user1, mediumBookId, locationThuisId,
+                createDateMoment(DisplayDateType.DATE, -2), "nice one"), savedExperiences);
+        saveExperience(createExperienceToSave("testFour", user1, mediumTheaterId, null,
+                createDateMoment(DisplayDateType.DATE_TIME, -1), null), savedExperiences);
+        saveExperience(createExperienceToSave("testFive", user1, mediumBookId, locationThuisId,
+                createDateMoment(DisplayDateType.DATE, 1), null), savedExperiences);
+        return savedExperiences;
     }
 }

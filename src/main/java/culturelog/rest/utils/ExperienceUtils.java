@@ -3,6 +3,8 @@ package culturelog.rest.utils;
 
 import culturelog.rest.domain.Experience;
 import culturelog.rest.dto.ExperienceDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 import java.util.Collections;
 import java.util.List;

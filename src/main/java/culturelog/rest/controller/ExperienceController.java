@@ -1,9 +1,6 @@
 package culturelog.rest.controller;
 
-import culturelog.rest.domain.DisplayDate;
 import culturelog.rest.domain.Experience;
-import culturelog.rest.domain.Moment;
-import culturelog.rest.domain.MomentType;
 import culturelog.rest.dto.ExperienceDto;
 import culturelog.rest.exception.CulturLogControllerExceptionKey;
 import culturelog.rest.exception.CultureLogException;
@@ -13,14 +10,19 @@ import culturelog.rest.service.ExperienceService;
 import culturelog.rest.service.MessageService;
 import culturelog.rest.utils.ExperienceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 /**
@@ -39,6 +41,11 @@ public class ExperienceController {
     @Autowired
     private MessageService messageService;
 
+    public static final int DEFAULT_PAGE_NUMBER = 0;
+    public static final int DEFAULT_PAGE_SIZE = 20;
+    public static final String DEFAULT_SORT_COLUMN = "moment.sortDate";
+    public static final boolean DEFAULT_SORT_ASC = false;
+
     @RequestMapping(method = RequestMethod.POST)
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createExperience(@RequestBody ExperienceDto experienceDto, Locale locale) {
@@ -55,14 +62,18 @@ public class ExperienceController {
             return ResponseEntity.badRequest().body(messageService.getControllerMessage(CulturLogControllerExceptionKey.EXPERIENCES_CREATE, e, locale));
         }
     }
-//
-//    @RequestMapping(method = RequestMethod.GET)
-//    @PreAuthorize("isAuthenticated()")
-//    public List<Experience> getExperienceList() {
-//        String username = securityService.getLoggedInUsername();
-//        return experienceService.getExperiencesOfUser(username);
-//    }
-//
+
+    @RequestMapping(method = RequestMethod.GET)
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getExperienceList(@PageableDefault(page = DEFAULT_PAGE_NUMBER, size = DEFAULT_PAGE_SIZE)
+                                                   @SortDefault.SortDefaults({
+                                                           @SortDefault(sort = DEFAULT_SORT_COLUMN, direction = Sort.Direction.DESC)
+                                                   })
+                                                           Pageable pageable) {
+        Page<Experience> experiencePage = experienceService.getExperiencesOfUser(securityService.getLoggedInUserId(), pageable);
+        return ResponseEntity.ok().body(experiencePage.map(ExperienceUtils::toExperienceDto));
+    }
+
 //    @RequestMapping(value = "/{experienceId}", method = RequestMethod.GET)
 //    @PreAuthorize("isAuthenticated()")
 //    public ResponseEntity<?> getExperience(@PathVariable(value="experienceId", required = true) Long experienceId) {
