@@ -77,3 +77,42 @@ get all experiences of logged in user: GET /experiences
 get one experience of logged in user: GET /experiences/{experienceId}
 
 update an experience of logged in user: GET /experiences/{experienceId} , body Json object Experience
+
+## Docker configuration
+
+### database postgres
+
+info from https://docs.docker.com/samples/library/postgres/
+
+#### culturelog docker image
+
+A custom culturelog db psql image is defined in /scr/test/resources/docker/db. Create this images by executing in this folder:
+
+
+```
+docker build -t culturelog-db-psql .
+```
+
+this will initialize necessary users and databases
+
+#### run the container
+
+```
+docker run --name culurelog-db -e POSTGRES_PASSWORD=xxx -d -p 5432:5432 culturelog-db-psql
+```
+
+the -p option makes the database port available for local use
+
+#### interact with the container
+
+* open psql command (if it is not possible on command line):
+
+```
+docker run -it --rm --link culurelog-db:postgres postgres psql -h postgres -U postgres
+```
+
+* (linux) open bash to the database container:
+
+```
+docker exec -it culurelog-db /bin/bash
+```
