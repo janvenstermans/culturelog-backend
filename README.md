@@ -80,7 +80,7 @@ update an experience of logged in user: GET /experiences/{experienceId} , body J
 
 ## Docker configuration
 
-running service 'database' and 'backend-rest': use docker-compse.yml file in src/docker
+running service 'database' and 'backend': use docker-compse.yml file in src/docker
 
 ```
 docker-compose up
@@ -92,7 +92,7 @@ if you only want the database service to start:
 docker-compose up database
 ```
 
-requirement for using service 'backend-rest':
+requirement for using service 'backend':
 
 * jar in src/docker/app
 * the name of jar is the same in the docker-compose.yml file
