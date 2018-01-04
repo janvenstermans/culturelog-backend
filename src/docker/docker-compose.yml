@@ -1,0 +1,19 @@
+version: '2'
+
+services:
+  database:
+    image: postgres:9.6
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d
+#    this port can be in comment, if only backend-rest needs database
+    ports:
+      - 5432:5432
+  backend-rest:
+    image: openjdk:8-jre
+    volumes:
+      - ./app:/home/
+    ports:
+      - 5000:8080
+#   command will enable connecting to the database service in this docker-compse file
+    command: java -jar /home/culturelog-rest-1.0-SNAPSHOT.jar --spring.datasource.url=jdbc:postgresql://database:5432/culturelog
+

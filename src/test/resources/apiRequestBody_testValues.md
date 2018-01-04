@@ -1,7 +1,7 @@
 ﻿Some test Request body values for API calls
 
 # create user
-api/users/register
+POST api/users
 
 ```json
 {"password":"password", "username":"a@b.cd"}

@@ -82,3 +82,6 @@ public/css/sass
 # =========
 target
 
+# docker
+# =========
+src/docker/app/*.jar

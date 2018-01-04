@@ -52,7 +52,7 @@ Default api url startpoint is host/api/...
 
 ### User endpoint
 
-create user: POST /users/register , body Json object UserCreateDto
+create user: POST /users , body Json object UserCreateDto
 
 (TODO) update user (not username or password): PUT /users/update , body Json object UserDto
 
@@ -80,39 +80,19 @@ update an experience of logged in user: GET /experiences/{experienceId} , body J
 
 ## Docker configuration
 
-### database postgres
-
-info from https://docs.docker.com/samples/library/postgres/
-
-#### culturelog docker image
-
-A custom culturelog db psql image is defined in /scr/test/resources/docker/db. Create this images by executing in this folder:
-
+running service 'database' and 'backend-rest': use docker-compse.yml file in src/docker
 
 ```
-docker build -t culturelog-db-psql .
+docker-compose up
 ```
 
-this will initialize necessary users and databases
-
-#### run the container
+if you only want the database service to start:
 
 ```
-docker run --name culurelog-db -e POSTGRES_PASSWORD=xxx -d -p 5432:5432 culturelog-db-psql
+docker-compose up database
 ```
 
-the -p option makes the database port available for local use
+requirement for using service 'backend-rest':
 
-#### interact with the container
-
-* open psql command (if it is not possible on command line):
-
-```
-docker run -it --rm --link culurelog-db:postgres postgres psql -h postgres -U postgres
-```
-
-* (linux) open bash to the database container:
-
-```
-docker exec -it culurelog-db /bin/bash
-```
+* jar in src/docker/app
+* the name of jar is the same in the docker-compose.yml file
