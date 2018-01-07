@@ -28,7 +28,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import static culturelog.backend.controller.LocationControllerTest.createLocationToSave;
-import static culturelog.backend.controller.MediumControllerTest.createMediumToSave;
+import static culturelog.backend.controller.ExperienceTypeControllerTest.createExperienceTypeToSave;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = CultureLogBackendApplication.class)
@@ -45,7 +45,7 @@ public class ExperienceRepositoryTest {
     private UserRepository userRepository;
 
     @Autowired
-    private MediumRepository mediumRepository;
+    private ExperienceTypeRepository experienceTypeRepository;
 
     @Autowired
     private LocationRepository locationRepository;
@@ -119,22 +119,22 @@ public class ExperienceRepositoryTest {
      */
     private TreeMap<Date, Experience> createExperiencesForUser(Long userId) throws CultureLogException {
         User user1 = userRepository.findOne(userId);
-        Long mediumFilmId = CultureLogTestConfiguration.getGlobalMediumIdFilm();
-        Long mediumBookId = CultureLogTestConfiguration.getGlobalMediumIdBook();
-        Long mediumTheaterId = mediumRepository.save(createMediumToSave("theaterCommon", user1)).getId();
+        Long experienceTypeFilmId = CultureLogTestConfiguration.getGlobalExperienceTypeIdFilm();
+        Long experienceTypeBookId = CultureLogTestConfiguration.getGlobalExperienceTypeIdBook();
+        Long experienceTypeTheaterId = experienceTypeRepository.save(createExperienceTypeToSave("theaterCommon", user1)).getId();
         Long locationKinepolisId = CultureLogTestConfiguration.getGlobalLocationIdKinepolis();
         Long locationThuisId = locationRepository.save(createLocationToSave("thuis", user1)).getId();
         //key: moment sortDate, value: savedExperience
         TreeMap<Date, Experience> savedExperiences = new TreeMap<>();
-        saveExperience(createExperienceToSave("testOne", user1, mediumFilmId, locationKinepolisId,
+        saveExperience(createExperienceToSave("testOne", user1, experienceTypeFilmId, locationKinepolisId,
                 ExperienceControllerTest.createDateMoment(DisplayDateType.DATE, 0), "ok"), savedExperiences);
-        saveExperience(createExperienceToSave("testTwo", user1, mediumTheaterId, null,
+        saveExperience(createExperienceToSave("testTwo", user1, experienceTypeTheaterId, null,
                 ExperienceControllerTest.createDateMoment(DisplayDateType.DATE_TIME, 2), "like this"), savedExperiences);
-        saveExperience(createExperienceToSave("testThree", user1, mediumBookId, locationThuisId,
+        saveExperience(createExperienceToSave("testThree", user1, experienceTypeBookId, locationThuisId,
                 ExperienceControllerTest.createDateMoment(DisplayDateType.DATE, -2), "nice one"), savedExperiences);
-        saveExperience(createExperienceToSave("testFour", user1, mediumTheaterId, null,
+        saveExperience(createExperienceToSave("testFour", user1, experienceTypeTheaterId, null,
                 ExperienceControllerTest.createDateMoment(DisplayDateType.DATE_TIME, -1), null), savedExperiences);
-        saveExperience(createExperienceToSave("testFive", user1, mediumBookId, locationThuisId,
+        saveExperience(createExperienceToSave("testFive", user1, experienceTypeBookId, locationThuisId,
                 ExperienceControllerTest.createDateMoment(DisplayDateType.DATE, 1), null), savedExperiences);
         return savedExperiences;
     }
@@ -144,12 +144,12 @@ public class ExperienceRepositoryTest {
         savedExperiences.put(experience.getMoment().getSortDate(), experience);
     }
 
-    public Experience createExperienceToSave(String name, User user, Long mediumId, Long locationId, Moment moment, String comment) {
+    public Experience createExperienceToSave(String name, User user, Long experienceTypeId, Long locationId, Moment moment, String comment) {
         Experience experience = new Experience();
         experience.setName(name);
         experience.setUser(user);
-        if (mediumId != null) {
-            experience.setType(mediumRepository.findOne(mediumId));
+        if (experienceTypeId != null) {
+            experience.setType(experienceTypeRepository.findOne(experienceTypeId));
         }
         if (locationId != null) {
             experience.setLocation(locationRepository.findOne(locationId));

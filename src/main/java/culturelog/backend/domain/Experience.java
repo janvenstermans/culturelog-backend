@@ -26,7 +26,7 @@ public class Experience {
 
     @ManyToOne
     @JoinColumn(name = "experienceTypeId", nullable = false)
-    private Medium type;
+    private ExperienceType type;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "momentId", nullable = false)
@@ -62,11 +62,11 @@ public class Experience {
         this.user = user;
     }
 
-    public Medium getType() {
+    public ExperienceType getType() {
         return type;
     }
 
-    public void setType(Medium type) {
+    public void setType(ExperienceType type) {
         this.type = type;
     }
 

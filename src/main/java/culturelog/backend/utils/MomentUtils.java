@@ -19,11 +19,11 @@ public class MomentUtils {
     private MomentUtils() {
     }
 
-    public static List<MomentDto> toMomentDtoList(List<Moment> mediumlist) {
-        if (mediumlist == null) {
+    public static List<MomentDto> toMomentDtoList(List<Moment> momentList) {
+        if (momentList == null) {
             return Collections.emptyList();
         }
-        return mediumlist.stream().map(MomentUtils::toMomentDto).collect(Collectors.toList());
+        return momentList.stream().map(MomentUtils::toMomentDto).collect(Collectors.toList());
     }
 
     public static MomentDto toMomentDto(Moment moment) {

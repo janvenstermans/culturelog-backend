@@ -54,11 +54,11 @@ databaseChangeLog:
             baseColumnNames: experience_type_id
             baseTableName: experience
             baseTableSchemaName: culturelog
-            constraintName: fk_experience_medium
+            constraintName: fk_experience_experienceType
             onDelete: CASCADE
             onUpdate: RESTRICT
             referencedColumnNames: id
-            referencedTableName: medium
+            referencedTableName: experience_type
             referencedTableSchemaName: culturelog
         - addForeignKeyConstraint:
             baseColumnNames: moment_id

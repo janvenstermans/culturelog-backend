@@ -9,7 +9,7 @@ public class ExperienceDto {
 
     private String name;
 
-    private MediumDto type;
+    private ExperienceTypeDto type;
 
     private MomentDto moment;
 
@@ -33,11 +33,11 @@ public class ExperienceDto {
         this.name = name;
     }
 
-    public MediumDto getType() {
+    public ExperienceTypeDto getType() {
         return type;
     }
 
-    public void setType(MediumDto type) {
+    public void setType(ExperienceTypeDto type) {
         this.type = type;
     }
 

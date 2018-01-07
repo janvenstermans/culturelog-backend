@@ -1,11 +1,11 @@
 package culturelog.backend.configuration;
 
+import culturelog.backend.domain.ExperienceType;
 import culturelog.backend.domain.Location;
-import culturelog.backend.domain.Medium;
 import culturelog.backend.dto.UserCreateDto;
 import culturelog.backend.exception.CultureLogException;
 import culturelog.backend.service.LocationService;
-import culturelog.backend.service.MediumService;
+import culturelog.backend.service.ExperienceTypeService;
 import culturelog.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +22,7 @@ public class CultureLogTestConfiguration {
     private UserService userService;
 
     @Autowired
-    private MediumService mediumService;
+    private ExperienceTypeService experienceTypeService;
 
     @Autowired
     private LocationService locationService;
@@ -35,10 +35,10 @@ public class CultureLogTestConfiguration {
     public static final String USER2_PASS = "password";
     private static Long USER2_ID;
 
-    public static final String GLOBAL_MEDIUM_NAME_FILM = "film";
-    public static final String GLOBAL_MEDIUM_NAME_BOOK = "boek";
-    private static Long GLOBAL_MEDIUM_ID_FILM;
-    private static Long GLOBAL_MEDIUM_ID_BOOK;
+    public static final String GLOBAL_EXPERIENCETYPE_NAME_FILM = "film";
+    public static final String GLOBAL_EXPERIENCETYPE_NAME_BOOK = "boek";
+    private static Long GLOBAL_EXPERIENCETYPE_ID_FILM;
+    private static Long GLOBAL_EXPERIENCETYPE_ID_BOOK;
 
     public static final String GLOBAL_LOCATION_NAME_KINEPOLIS_GENT = "Kinepolis Gent";
     public static final String GLOBAL_LOCATION_NAME_VOORUIT = "Vooruit";
@@ -48,7 +48,7 @@ public class CultureLogTestConfiguration {
     @PostConstruct
     protected void fillDbWithTestData() throws CultureLogException {
         addUsers();
-        addGlobalMedia();
+        addGlobalExperienceTypes();
         addGlobalLocations();
     }
 
@@ -60,12 +60,12 @@ public class CultureLogTestConfiguration {
         return USER2_ID;
     }
 
-    public static Long getGlobalMediumIdFilm() {
-        return GLOBAL_MEDIUM_ID_FILM;
+    public static Long getGlobalExperienceTypeIdFilm() {
+        return GLOBAL_EXPERIENCETYPE_ID_FILM;
     }
 
-    public static Long getGlobalMediumIdBook() {
-        return GLOBAL_MEDIUM_ID_BOOK;
+    public static Long getGlobalExperienceTypeIdBook() {
+        return GLOBAL_EXPERIENCETYPE_ID_BOOK;
     }
 
     public static Long getGlobalLocationIdKinepolis() {
@@ -88,13 +88,13 @@ public class CultureLogTestConfiguration {
         USER2_ID = userService.registerUser(user2CreateDto).getId();
     }
 
-    private void addGlobalMedia() throws CultureLogException {
-        Medium mediumFilm = new Medium();
-        mediumFilm.setName(GLOBAL_MEDIUM_NAME_FILM);
-        GLOBAL_MEDIUM_ID_FILM = mediumService.save(mediumFilm).getId();
-        Medium mediumBook = new Medium();
-        mediumBook.setName(GLOBAL_MEDIUM_NAME_BOOK);
-        GLOBAL_MEDIUM_ID_BOOK = mediumService.save(mediumBook).getId();
+    private void addGlobalExperienceTypes() throws CultureLogException {
+        ExperienceType experienceTypeFilm = new ExperienceType();
+        experienceTypeFilm.setName(GLOBAL_EXPERIENCETYPE_NAME_FILM);
+        GLOBAL_EXPERIENCETYPE_ID_FILM = experienceTypeService.save(experienceTypeFilm).getId();
+        ExperienceType experienceTypeBook = new ExperienceType();
+        experienceTypeBook.setName(GLOBAL_EXPERIENCETYPE_NAME_BOOK);
+        GLOBAL_EXPERIENCETYPE_ID_BOOK = experienceTypeService.save(experienceTypeBook).getId();
     }
 
     private void addGlobalLocations() throws CultureLogException {

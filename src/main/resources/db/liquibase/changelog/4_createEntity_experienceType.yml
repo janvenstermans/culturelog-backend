@@ -4,7 +4,7 @@ databaseChangeLog:
       author: janvenstermans
       changes:
         - createTable:
-            tableName: medium
+            tableName: experience_type
             schemaName: culturelog
             columns:
               - column:
@@ -27,9 +27,9 @@ databaseChangeLog:
                   type: int
         - addForeignKeyConstraint:
             baseColumnNames: user_id
-            baseTableName: medium
+            baseTableName: experience_type
             baseTableSchemaName: culturelog
-            constraintName: fk_medium_user
+            constraintName: fk_experienceType_user
             onDelete: CASCADE
             onUpdate: RESTRICT
             referencedColumnNames: id
@@ -37,6 +37,6 @@ databaseChangeLog:
             referencedTableSchemaName: culturelog
         - addUniqueConstraint:
             columnNames: name,user_id
-            constraintName: medium_nameUser_unique
-            tableName: medium
+            constraintName: experienceType_nameUser_unique
+            tableName: experience_type
             schemaName: culturelog

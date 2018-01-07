@@ -1,10 +1,12 @@
 package culturelog.backend.dto;
 
+import culturelog.backend.domain.ExperienceType;
+
 /**
- * Dto format{@link culturelog.backend.domain.Medium}.
+ * Dto format{@link ExperienceType}.
  * @author Jan Venstermans
  */
-public class MediumDto {
+public class ExperienceTypeDto {
 
     private Long id;
 
@@ -49,7 +51,7 @@ public class MediumDto {
     @Override
     public String toString() {
         return String.format(
-                "MediumDto[id=%s, name='%s', description='%s', global='%s']",
+                "ExperienceTypeDto[id=%s, name='%s', description='%s', global='%s']",
                 id, name, description, global);
     }
 }

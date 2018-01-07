@@ -13,8 +13,8 @@ POST api/locations
 ```json
 {"name":"thuis"}
 ```
-# create medium
-POST api/media
+# create experienceType
+POST api/experienceTypes
 
 ```json
 {"name":"film"}

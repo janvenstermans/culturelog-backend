@@ -9,7 +9,7 @@ databaseChangeLog:
       file: classpath:db/liquibase/changelog/3_createEntity_location.yml
       relativeToChangelogFile: false
    - include:
-      file: classpath:db/liquibase/changelog/4_createEntity_medium.yml
+      file: classpath:db/liquibase/changelog/4_createEntity_experienceType.yml
       relativeToChangelogFile: false
    - include:
       file: classpath:db/liquibase/changelog/5_createEntity_moment.yml

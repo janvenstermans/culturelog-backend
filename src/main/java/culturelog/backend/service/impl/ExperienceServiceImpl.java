@@ -5,7 +5,7 @@ import culturelog.backend.exception.CultureLogException;
 import culturelog.backend.exception.CultureLogExceptionKey;
 import culturelog.backend.repository.ExperienceRepository;
 import culturelog.backend.repository.LocationRepository;
-import culturelog.backend.repository.MediumRepository;
+import culturelog.backend.repository.ExperienceTypeRepository;
 import culturelog.backend.service.ExperienceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -27,7 +27,7 @@ public class ExperienceServiceImpl implements ExperienceService {
     private ExperienceRepository experienceRepository;
 
     @Autowired
-    private MediumRepository mediumRepository;
+    private ExperienceTypeRepository experienceTypeRepository;
 
     @Autowired
     private LocationRepository locationRepository;
@@ -73,7 +73,7 @@ public class ExperienceServiceImpl implements ExperienceService {
         if (experience.getType() == null || experience.getType().getId() == null) {
             throw new CultureLogException(CultureLogExceptionKey.EXPERIENCE_NEEDS_TYPE_ATTRIBUTE);
         }
-        Medium experienceType = mediumRepository.findOne(experience.getType().getId());
+        ExperienceType experienceType = experienceTypeRepository.findOne(experience.getType().getId());
         if (experienceType == null) {
             throw new CultureLogException(CultureLogExceptionKey.EXPERIENCE_NEEDS_EXISTING_TYPE_ATTRIBUTE_FOR_USER, new Object[]{experience.getType().getId()});
         }

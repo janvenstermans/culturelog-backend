@@ -14,23 +14,23 @@ import javax.validation.constraints.NotNull;
  * @author Jan Venstermans
  */
 @Entity
-@Table(name = "medium", uniqueConstraints = {
-    @UniqueConstraint(name = "medium_nameUser_unique", columnNames = {"name", "userId"})
+@Table(name = "experience_type", uniqueConstraints = {
+    @UniqueConstraint(name = "experienceType_nameUser_unique", columnNames = {"name", "userId"})
 })
-public class Medium {
+public class ExperienceType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
-     * Name of the medium. Is used as a key.
+     * Name of the experienceType. Is used as a key.
      */
     @NotNull
     private String name;
 
     /**
-     * Description or title of the medium.
+     * Description or title of the experienceType.
      */
     private String description;
 
@@ -73,7 +73,7 @@ public class Medium {
     @Override
     public String toString() {
         return String.format(
-                "Medium[id=%s, name='%s', description='%s', global='%s']",
+                "ExperienceType[id=%s, name='%s', description='%s', global='%s']",
                 id, name, description, user == null);
     }
 }

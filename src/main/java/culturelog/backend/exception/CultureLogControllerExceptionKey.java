@@ -6,9 +6,9 @@ package culturelog.backend.exception;
 public enum CultureLogControllerExceptionKey {
     USERS_CREATE("users.create"),
 
-    MEDIA_CREATE("media.create"),
-    MEDIA_GET_ONE_UNKNOWN_ID("media.getOne.unknownId"),
-    MEDIA_UPDATE_ONE("media.updateOne"),
+    EXPERIENCETYPES_CREATE("experienceTypes.create"),
+    EXPERIENCETYPES_GET_ONE_UNKNOWN_ID("experienceTypes.getOne.unknownId"),
+    EXPERIENCETYPES_UPDATE_ONE("experienceTypes.updateOne"),
 
     LOCATIONS_CREATE("locations.create"),
     LOCATIONS_GET_ONE_UNKNOWN_ID("locations.getOne.unknownId"),

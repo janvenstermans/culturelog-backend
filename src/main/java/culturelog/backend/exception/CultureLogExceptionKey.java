@@ -6,8 +6,8 @@ package culturelog.backend.exception;
 public enum CultureLogExceptionKey {
     CREATE_WITH_ID("createWithId"),
 
-    MEDIUM_NEEDS_NAME_ATTRIBUTE("medium.nameRequired"),
-    MEDIUM_WITH_NAME_FOR_USER_ALREADY_EXISTS("mediumWithNameForUserAlreadyExists"),
+    EXPERIENCETYPE_NEEDS_NAME_ATTRIBUTE("experienceType.nameRequired"),
+    EXPERIENCETYPE_WITH_NAME_FOR_USER_ALREADY_EXISTS("experienceTypeWithNameForUserAlreadyExists"),
 
     LOCATION_NEEDS_NAME_ATTRIBUTE("location.nameRequired"),
     LOCATION_WITH_NAME_FOR_USER_ALREADY_EXISTS("locationWithNameForUserAlreadyExists"),

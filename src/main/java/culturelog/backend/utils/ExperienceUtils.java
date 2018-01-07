@@ -3,8 +3,6 @@ package culturelog.backend.utils;
 
 import culturelog.backend.domain.Experience;
 import culturelog.backend.dto.ExperienceDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,7 +32,7 @@ public class ExperienceUtils {
         experienceDto.setId(experience.getId());
         experienceDto.setName(experience.getName());
         experienceDto.setName(experience.getName());
-        experienceDto.setType(MediumUtils.toMediumDto(experience.getType()));
+        experienceDto.setType(ExperienceTypeUtils.toExperienceTypeDto(experience.getType()));
         experienceDto.setMoment(MomentUtils.toMomentDto(experience.getMoment()));
         experienceDto.setLocation(LocationUtils.toLocationDto(experience.getLocation()));
         experienceDto.setComment(experience.getComment());
@@ -48,7 +46,7 @@ public class ExperienceUtils {
         Experience experience = new Experience();
         experience.setId(experienceDto.getId());
         experience.setName(experienceDto.getName());
-        experience.setType(MediumUtils.fromMediumDto(experienceDto.getType()));
+        experience.setType(ExperienceTypeUtils.fromExperienceTypeDto(experienceDto.getType()));
         experience.setMoment(MomentUtils.fromMomentDto(experienceDto.getMoment()));
         experience.setLocation(LocationUtils.fromLocationDto(experienceDto.getLocation()));
         experience.setComment(experienceDto.getComment());

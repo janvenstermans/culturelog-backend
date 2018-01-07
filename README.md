@@ -6,7 +6,7 @@ REST bakend for the CultureLog application.
 
 Keep track of your cultural experiences: save info of your theater, book, film, ... experiences by date.
 
-After logging them, the experiences can be filter by date, location, medium, ....
+After logging them, the experiences can be filter by date, location, experienceType, ....
 
 ## Technical info
 
@@ -76,7 +76,7 @@ get all experiences of logged in user: GET /experiences
 
 get one experience of logged in user: GET /experiences/{experienceId}
 
-update an experience of logged in user: GET /experiences/{experienceId} , body Json object Experience
+update an experience of logged in user: UPDATE /experiences/{experienceId} , body Json object Experience
 
 ## Docker configuration
 

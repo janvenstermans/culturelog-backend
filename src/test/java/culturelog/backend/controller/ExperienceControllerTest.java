@@ -7,25 +7,25 @@ import culturelog.backend.configuration.CultureLogTestConfiguration;
 import culturelog.backend.domain.DisplayDate;
 import culturelog.backend.domain.DisplayDateType;
 import culturelog.backend.domain.Experience;
+import culturelog.backend.domain.ExperienceType;
 import culturelog.backend.domain.Location;
-import culturelog.backend.domain.Medium;
 import culturelog.backend.domain.Moment;
 import culturelog.backend.domain.MomentType;
 import culturelog.backend.domain.User;
 import culturelog.backend.dto.DateMomentDto;
 import culturelog.backend.dto.ExperienceDto;
+import culturelog.backend.dto.ExperienceTypeDto;
 import culturelog.backend.dto.LocationDto;
-import culturelog.backend.dto.MediumDto;
 import culturelog.backend.exception.CultureLogException;
 import culturelog.backend.repository.ExperienceRepository;
 import culturelog.backend.repository.LocationRepository;
-import culturelog.backend.repository.MediumRepository;
+import culturelog.backend.repository.ExperienceTypeRepository;
 import culturelog.backend.repository.UserRepository;
 import culturelog.backend.service.ExperienceService;
 import culturelog.backend.service.MessageService;
 import culturelog.backend.utils.DisplayDateUtils;
 import culturelog.backend.utils.LocationUtils;
-import culturelog.backend.utils.MediumUtils;
+import culturelog.backend.utils.ExperienceTypeUtils;
 import net.minidev.json.JSONArray;
 import org.junit.Assert;
 import org.junit.Test;
@@ -52,7 +52,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import static culturelog.backend.controller.LocationControllerTest.createLocationToSave;
-import static culturelog.backend.controller.MediumControllerTest.createMediumToSave;
+import static culturelog.backend.controller.ExperienceTypeControllerTest.createExperienceTypeToSave;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
@@ -86,7 +86,7 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
     private ExperienceRepository experienceRepository;
 
     @Autowired
-    private MediumRepository mediumRepository;
+    private ExperienceTypeRepository experienceTypeRepository;
 
     @Autowired
     private LocationRepository locationRepository;
@@ -142,7 +142,7 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
 
     @Test
     public void testCreateExperience_nameRequired() throws Exception {
-        Long filmTypeId = CultureLogTestConfiguration.getGlobalMediumIdFilm();
+        Long filmTypeId = CultureLogTestConfiguration.getGlobalExperienceTypeIdFilm();
         ExperienceDto experienceDto = creatExperienceToSave(null, filmTypeId);
 
         int experienceCountBefore = experienceRepository.findAll().size();
@@ -180,7 +180,7 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
     @Test
     public void testCreateExperience_withNameAndTypeWithoutTypeId__typeIdRequired() throws Exception {
         ExperienceDto experienceDto = creatExperienceToSave("Shakespeare in love", null);
-        experienceDto.setType(new MediumDto());
+        experienceDto.setType(new ExperienceTypeDto());
 
         int experienceCountBefore = experienceRepository.findAll().size();
 
@@ -200,8 +200,8 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
     public void testCreateExperience_withNameAndType__typeIdUnknown_fails() throws Exception {
         ExperienceDto experienceDto = creatExperienceToSave("Shakespeare in love", null);
         Long typeUnknownId = 15556L;
-        Assert.assertNull(mediumRepository.findOne(typeUnknownId));
-        experienceDto.setType(new MediumDto());
+        Assert.assertNull(experienceTypeRepository.findOne(typeUnknownId));
+        experienceDto.setType(new ExperienceTypeDto());
         experienceDto.getType().setId(typeUnknownId);
 
         int experienceCountBefore = experienceRepository.findAll().size();
@@ -221,10 +221,10 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
     @Test
     public void testCreateExperience_withNameAndType__typeOfOtherUser_fails() throws Exception {
         User user2 = userRepository.findOne(CultureLogTestConfiguration.getUser2Id());
-        Long mediumId = mediumRepository.save(createMediumToSave("testTwo", user2)).getId();
+        Long experienceTypeId = experienceTypeRepository.save(createExperienceTypeToSave("testTwo", user2)).getId();
         //use experienceType of user2 for experience of user1
-        ExperienceDto experienceDto = creatExperienceToSave("Shakespeare in love", mediumId);
-        Assert.assertNotNull(mediumRepository.findOne(mediumId));
+        ExperienceDto experienceDto = creatExperienceToSave("Shakespeare in love", experienceTypeId);
+        Assert.assertNotNull(experienceTypeRepository.findOne(experienceTypeId));
 
         int experienceCountBefore = experienceRepository.findAll().size();
 
@@ -242,7 +242,7 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
 
     @Test
     public void testCreateExperience_withNameAndGlobalTypeWithoutMoment__createSuccesful_momentDefaultCurrentDate() throws Exception {
-        Long filmTypeId = CultureLogTestConfiguration.getGlobalMediumIdFilm();
+        Long filmTypeId = CultureLogTestConfiguration.getGlobalExperienceTypeIdFilm();
         String experienceName = "Shakespeare in love";
         ExperienceDto experienceDto = creatExperienceToSave(experienceName, filmTypeId);
 
@@ -278,7 +278,7 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
     @Test
     public void testCreateExperience_withNameAndCustomTypeAndMomentAndComment__createSuccesful() throws Exception {
         User user1 = userRepository.findOne(CultureLogTestConfiguration.getUser1Id());
-        Long customExperienceTypeId = mediumRepository.save(createMediumToSave("testOne", user1)).getId();
+        Long customExperienceTypeId = experienceTypeRepository.save(createExperienceTypeToSave("testOne", user1)).getId();
         String experienceName = "Shakespeare in love 2";
         String experienceComment = "First one better";
         ExperienceDto experienceDto = creatExperienceToSave(experienceName, customExperienceTypeId);
@@ -318,14 +318,14 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
 
     @Test
     public void testCreateExperience_onSuccess_doesNotUpdateExperienceType() throws Exception {
-        Long filmTypeId = CultureLogTestConfiguration.getGlobalMediumIdFilm();
-        Medium existingType = mediumRepository.findOne(filmTypeId);
+        Long filmTypeId = CultureLogTestConfiguration.getGlobalExperienceTypeIdFilm();
+        ExperienceType existingType = experienceTypeRepository.findOne(filmTypeId);
         Assert.assertNotNull(existingType);
         String existingTypeNameOriginal = existingType.getName();
         String existingTypeNameAlteration = existingTypeNameOriginal + "Alter";
         String experienceName = "Shakespeare in love";
         ExperienceDto experienceDto = creatExperienceToSave(experienceName, null);
-        experienceDto.setType(new MediumDto());
+        experienceDto.setType(new ExperienceTypeDto());
         experienceDto.getType().setId(filmTypeId);
         experienceDto.getType().setName(existingTypeNameAlteration);
 
@@ -343,7 +343,7 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
         int experienceCountAfter = experienceRepository.findAll().size();
         assertEquals(experienceCountBefore + 1, experienceCountAfter);
 
-        Medium existingTypeAfterCreation = mediumRepository.findOne(filmTypeId);
+        ExperienceType existingTypeAfterCreation = experienceTypeRepository.findOne(filmTypeId);
         Assert.assertEquals(existingTypeNameOriginal, existingTypeAfterCreation.getName());
     }
 
@@ -351,7 +351,7 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
 
     @Test
     public void testCreateExperience_locationEmpty_fails() throws Exception {
-        Long filmTypeId = CultureLogTestConfiguration.getGlobalMediumIdFilm();
+        Long filmTypeId = CultureLogTestConfiguration.getGlobalExperienceTypeIdFilm();
         String experienceName = "Shakespeare in love";
         ExperienceDto experienceDto = creatExperienceToSave(experienceName, filmTypeId);
         experienceDto.setLocation(new LocationDto());
@@ -373,7 +373,7 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
 
     @Test
     public void testCreateExperience_locationGlobal_success() throws Exception {
-        Long filmTypeId = CultureLogTestConfiguration.getGlobalMediumIdFilm();
+        Long filmTypeId = CultureLogTestConfiguration.getGlobalExperienceTypeIdFilm();
         String experienceName = "Shakespeare in love";
         ExperienceDto experienceDto = creatExperienceToSave(experienceName, filmTypeId);
         Long locationGlobalId = CultureLogTestConfiguration.getGlobalLocationIdVooruit();
@@ -398,7 +398,7 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
 
     @Test
     public void testCreateExperience_locationOwn_success_doesNotUpdateLocation() throws Exception {
-        Long filmTypeId = CultureLogTestConfiguration.getGlobalMediumIdFilm();
+        Long filmTypeId = CultureLogTestConfiguration.getGlobalExperienceTypeIdFilm();
         String experienceName = "Shakespeare in love";
         ExperienceDto experienceDto = creatExperienceToSave(experienceName, filmTypeId);
         User user1 = userRepository.findOne(CultureLogTestConfiguration.getUser1Id());
@@ -433,7 +433,7 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
 
     @Test
     public void testCreateExperience_locationOfOtherUser_fails() throws Exception {
-        Long filmTypeId = CultureLogTestConfiguration.getGlobalMediumIdFilm();
+        Long filmTypeId = CultureLogTestConfiguration.getGlobalExperienceTypeIdFilm();
         String experienceName = "Shakespeare in love";
         ExperienceDto experienceDto = creatExperienceToSave(experienceName, filmTypeId);
         User user2 = userRepository.findOne(CultureLogTestConfiguration.getUser2Id());
@@ -556,12 +556,12 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
 
     // helper methods
 
-    private ExperienceDto creatExperienceToSave(String name, Long mediumId) {
+    private ExperienceDto creatExperienceToSave(String name, Long experienceTypeId) {
         ExperienceDto experience = new ExperienceDto();
         experience.setName(name);
-        if (mediumId != null) {
-            Medium medium = mediumRepository.findOne(mediumId);
-            experience.setType(MediumUtils.toMediumDto(medium));
+        if (experienceTypeId != null) {
+            ExperienceType experienceType = experienceTypeRepository.findOne(experienceTypeId);
+            experience.setType(ExperienceTypeUtils.toExperienceTypeDto(experienceType));
         }
         return experience;
     }
@@ -611,12 +611,12 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
         Assert.assertEquals(experience.getComment(), experienceJson.get("comment"));
     }
 
-    public Experience createExperienceToSave(String name, User user, Long mediumId, Long locationId, Moment moment, String comment) {
+    public Experience createExperienceToSave(String name, User user, Long experienceTypeId, Long locationId, Moment moment, String comment) {
         Experience experience = new Experience();
         experience.setName(name);
         experience.setUser(user);
-        if (mediumId != null) {
-            experience.setType(mediumRepository.findOne(mediumId));
+        if (experienceTypeId != null) {
+            experience.setType(experienceTypeRepository.findOne(experienceTypeId));
         }
         if (locationId != null) {
             experience.setLocation(locationRepository.findOne(locationId));
@@ -680,22 +680,22 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
      */
     private TreeMap<Date, Experience> createExperiencesForUser(Long userId) throws CultureLogException {
         User user1 = userRepository.findOne(userId);
-        Long mediumFilmId = CultureLogTestConfiguration.getGlobalMediumIdFilm();
-        Long mediumBookId = CultureLogTestConfiguration.getGlobalMediumIdBook();
-        Long mediumTheaterId = mediumRepository.save(createMediumToSave("theaterCommon", user1)).getId();
+        Long experienceTypeFilmId = CultureLogTestConfiguration.getGlobalExperienceTypeIdFilm();
+        Long experienceTypeBookId = CultureLogTestConfiguration.getGlobalExperienceTypeIdBook();
+        Long experienceTypeTheaterId = experienceTypeRepository.save(createExperienceTypeToSave("theaterCommon", user1)).getId();
         Long locationKinepolisId = CultureLogTestConfiguration.getGlobalLocationIdKinepolis();
         Long locationThuisId = locationRepository.save(createLocationToSave("thuis", user1)).getId();
         //key: moment sortDate, value: savedExperience
         TreeMap<Date, Experience> savedExperiences = new TreeMap<>();
-        saveExperience(createExperienceToSave("testOne", user1, mediumFilmId, locationKinepolisId,
+        saveExperience(createExperienceToSave("testOne", user1, experienceTypeFilmId, locationKinepolisId,
                 createDateMoment(DisplayDateType.DATE, 0), "ok"), savedExperiences);
-        saveExperience(createExperienceToSave("testTwo", user1, mediumTheaterId, null,
+        saveExperience(createExperienceToSave("testTwo", user1, experienceTypeTheaterId, null,
                 createDateMoment(DisplayDateType.DATE_TIME, 2), "like this"), savedExperiences);
-        saveExperience(createExperienceToSave("testThree", user1, mediumBookId, locationThuisId,
+        saveExperience(createExperienceToSave("testThree", user1, experienceTypeBookId, locationThuisId,
                 createDateMoment(DisplayDateType.DATE, -2), "nice one"), savedExperiences);
-        saveExperience(createExperienceToSave("testFour", user1, mediumTheaterId, null,
+        saveExperience(createExperienceToSave("testFour", user1, experienceTypeTheaterId, null,
                 createDateMoment(DisplayDateType.DATE_TIME, -1), null), savedExperiences);
-        saveExperience(createExperienceToSave("testFive", user1, mediumBookId, locationThuisId,
+        saveExperience(createExperienceToSave("testFive", user1, experienceTypeBookId, locationThuisId,
                 createDateMoment(DisplayDateType.DATE, 1), null), savedExperiences);
         return savedExperiences;
     }
