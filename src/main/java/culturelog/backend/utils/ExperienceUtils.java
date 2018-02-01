@@ -2,6 +2,7 @@ package culturelog.backend.utils;
 
 
 import culturelog.backend.domain.Experience;
+import culturelog.backend.domain.User;
 import culturelog.backend.dto.ExperienceDto;
 
 import java.util.Collections;
@@ -15,6 +16,13 @@ import java.util.stream.Collectors;
 public class ExperienceUtils {
 
     private ExperienceUtils() {
+    }
+
+    public static boolean isExperienceOfUser(Experience experience, User user) {
+        if (experience == null) {
+            throw new IllegalArgumentException("experience cannot be null");
+        }
+        return UserUtils.areUsersSame(experience.getUser(), user);
     }
 
     public static List<ExperienceDto> toExperienceDtoList(List<Experience> experienceList) {

@@ -14,7 +14,9 @@ public enum CultureLogControllerExceptionKey {
     LOCATIONS_GET_ONE_UNKNOWN_ID("locations.getOne.unknownId"),
     LOCATIONS_UPDATE_ONE("locations.updateOne"),
 
-    EXPERIENCES_CREATE("experiences.create")
+    EXPERIENCES_CREATE("experiences.create"),
+    EXPERIENCES_GET_ONE_UNKNOWN_ID("experiences.getOne.unknownId"),
+    EXPERIENCES_UPDATE_ONE("experiences.updateOne")
     ;
 
     private final String key;

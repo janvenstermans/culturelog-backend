@@ -45,7 +45,7 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public Location getById(Long userId) {
-        return locationRepository.findOne(userId);
+    public Location getById(Long locationId) {
+        return locationRepository.findOne(locationId);
     }
 }

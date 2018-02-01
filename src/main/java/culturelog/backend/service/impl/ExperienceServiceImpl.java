@@ -42,9 +42,10 @@ public class ExperienceServiceImpl implements ExperienceService {
         return experienceRepository.findByUserId(userId, pageable);
     }
 
-//    public Experience getById(Long experienceId) {
-//        return experienceRepository.findOne(experienceId);
-//    }
+    @Override
+    public Experience getById(Long experienceId) {
+        return experienceRepository.findOne(experienceId);
+    }
 
     private void checkRequiredFieldsForSave(@NotNull Experience experience) throws CultureLogException {
         if (experience.getName() == null) {

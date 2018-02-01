@@ -1,6 +1,7 @@
 package culturelog.backend.controller;
 
 import culturelog.backend.domain.Experience;
+import culturelog.backend.domain.User;
 import culturelog.backend.dto.ExperienceDto;
 import culturelog.backend.exception.CultureLogControllerExceptionKey;
 import culturelog.backend.exception.CultureLogException;
@@ -9,6 +10,7 @@ import culturelog.backend.security.CultureLogSecurityService;
 import culturelog.backend.service.ExperienceService;
 import culturelog.backend.service.MessageService;
 import culturelog.backend.utils.ExperienceUtils;
+import culturelog.backend.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +20,7 @@ import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -74,33 +77,39 @@ public class ExperienceController {
         return ResponseEntity.ok().body(experiencePage.map(ExperienceUtils::toExperienceDto));
     }
 
-//    @RequestMapping(value = "/{experienceId}", method = RequestMethod.GET)
-//    @PreAuthorize("isAuthenticated()")
-//    public ResponseEntity<?> getExperience(@PathVariable(value="experienceId", required = true) Long experienceId) {
-//        String username = securityService.getLoggedInUsername();
-//        Experience experience = experienceService.getById(experienceId);
-//        if (experience != null && experience.getUsername().equals(username)) {
-//            return ResponseEntity.ok(experience);
-//        }
-//        return ResponseEntity.badRequest().body("Cannot find experience with id " + experienceId);
-//    }
-//
-//    @RequestMapping(value = "/{experienceId}", method = RequestMethod.PUT)
-//    @PreAuthorize("isAuthenticated()")
-//    public ResponseEntity<?> updateExperience(@PathVariable(value="experienceId", required = true) Long experienceId,
-//                                              @RequestBody(required = true) Experience experience) {
-//        String username = securityService.getLoggedInUsername();
-//        Experience existingExperience = experienceService.getById(experienceId);
-//        if (existingExperience == null || !username.equals(existingExperience.getUsername())) {
-//            return ResponseEntity.badRequest().body("Cannot update experience with id " + experienceId);
-//        }
-//        experience.setId(experienceId);
-//        experience.setUsername(username);
-//        try {
-//            Experience updateExperience = experienceService.save(experience);
-//            return ResponseEntity.ok(updateExperience);
-//        } catch (CultureLogException e) {
-//            return ResponseEntity.badRequest().body(e);
-//        }
-//    }
+    @RequestMapping(value = "/{experienceId}", method = RequestMethod.GET)
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getExperience(@PathVariable(value="experienceId", required = true) Long experienceId, Locale locale) {
+        User user = securityService.getLoggedInUser();
+        Experience experience = experienceService.getById(experienceId);
+        if (experience != null && ExperienceUtils.isExperienceOfUser(experience, user)) {
+            return ResponseEntity.ok(ExperienceUtils.toExperienceDto(experience));
+        }
+        return ResponseEntity.badRequest().body(messageService.getControllerMessage(
+                CultureLogControllerExceptionKey.EXPERIENCES_GET_ONE_UNKNOWN_ID, new Object[]{experienceId}, locale));
+    }
+
+    @RequestMapping(value = "/{experienceId}", method = RequestMethod.PUT)
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> updateExperience(@PathVariable(value="experienceId", required = true) Long experienceId,
+                                              @RequestBody(required = true) ExperienceDto experienceDto, Locale locale) {
+        Experience experience = ExperienceUtils.fromExperienceDto(experienceDto);
+        User user = securityService.getLoggedInUser();
+        Experience existingExperience = experienceService.getById(experienceId);
+        if (existingExperience == null || !UserUtils.areUsersSame(existingExperience.getUser(), user)) {
+            return ResponseEntity.badRequest().body(messageService.getControllerMessage(
+                    CultureLogControllerExceptionKey.EXPERIENCES_UPDATE_ONE, new Object[]{experienceId}, locale));
+        }
+        experience.setId(experienceId);
+        experience.setUser(user);
+        try {
+            Experience updatedExperience = experienceService.save(experience);
+            return ResponseEntity.ok(ExperienceUtils.toExperienceDto(updatedExperience));
+        } catch (CultureLogException e) {
+            return ResponseEntity.badRequest().body(messageService.getControllerMessage(
+                    CultureLogControllerExceptionKey.EXPERIENCES_UPDATE_ONE, new Object[]{experienceId}, e, locale));
+        }
+    }
+
+    //TODO: remove experience
 }

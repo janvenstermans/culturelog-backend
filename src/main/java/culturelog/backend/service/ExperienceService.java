@@ -12,5 +12,8 @@ import org.springframework.data.domain.Pageable;
 public interface ExperienceService {
 
     Experience save(Experience experience) throws CultureLogException;
+
     Page<Experience> getExperiencesOfUser(Long userId, Pageable pageable);
+
+    Experience getById(Long experienceId);
 }

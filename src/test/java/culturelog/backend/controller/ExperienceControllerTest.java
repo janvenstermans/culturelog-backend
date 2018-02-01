@@ -24,6 +24,7 @@ import culturelog.backend.repository.UserRepository;
 import culturelog.backend.service.ExperienceService;
 import culturelog.backend.service.MessageService;
 import culturelog.backend.utils.DisplayDateUtils;
+import culturelog.backend.utils.ExperienceUtils;
 import culturelog.backend.utils.LocationUtils;
 import culturelog.backend.utils.ExperienceTypeUtils;
 import net.minidev.json.JSONArray;
@@ -63,6 +64,8 @@ import static org.junit.Assert.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -554,6 +557,172 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
         executeAndAssertGetExperiencesPage(1, pageSize, sort, true, expectedIdListPage1, experiencePage1);
     }
 
+    // -----------------------------------------
+    // url /experiences/{experienceId} OPTIONS
+    // -----------------------------------------
+
+    @Test
+    public void testExperienceUrl_allowedMethods() throws Exception {
+        testUrlAllowedMethods(String.format(URL_EXPERIENCE, CultureLogTestConfiguration.getGlobalLocationIdVooruit()), HttpMethod.GET, HttpMethod.PUT);
+    }
+
+    // -----------------------------------------
+    // url /experiences/{experienceId} GET
+    // -----------------------------------------
+
+    @Test
+    public void testGetExperience_notAuthorized() throws Exception {
+        mockMvc.perform(get(String.format(URL_EXPERIENCE, CultureLogTestConfiguration.getGlobalLocationIdVooruit())))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void testGetExperience_canGetOwnExperience() throws Exception {
+        Long experienceId = createExperienceForUser(CultureLogTestConfiguration.getUser1Id()).getId();
+
+        MvcResult result = mockMvc.perform(get(String.format(URL_EXPERIENCE, experienceId))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        ReadContext ctx = JsonPath.parse(result.getResponse().getContentAsString());
+        assertExperienceJson(experienceRepository.findOne(experienceId), ctx.read("$"));
+    }
+
+    @Test
+    public void testGetExperience_cannotGetOtherUsersLocation() throws Exception {
+        Long experienceId = createExperienceForUser(CultureLogTestConfiguration.getUser2Id()).getId();
+
+        mockMvc.perform(get(String.format(URL_EXPERIENCE, experienceId))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
+    }
+
+    @Test
+    public void testGetExperience_cannotGetNonExistingLocation() throws Exception {
+        Long experienceId = 1504648460L;
+        Assert.assertNull(experienceRepository.findOne(experienceId));
+
+        mockMvc.perform(get(String.format(URL_EXPERIENCE, experienceId))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
+    }
+
+    // -----------------------------------------
+    // url /experiences/{experienceId} PUT
+    // -----------------------------------------
+
+    @Test
+    public void testPutExperience_notAuthorized() throws Exception {
+        ExperienceDto experienceDto = new ExperienceDto();
+
+        mockMvc.perform(put(String.format(URL_EXPERIENCE, CultureLogTestConfiguration.getGlobalLocationIdVooruit()))
+                .content(this.json(experienceDto))
+                .contentType(contentType))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void testPutExperience_cannotEditOtherUsersExperience() throws Exception {
+        Long experienceId = createExperienceForUser(CultureLogTestConfiguration.getUser2Id()).getId();
+
+        ExperienceDto experienceDto = new ExperienceDto();
+        experienceDto.setId(experienceId);
+
+        mockMvc.perform(put(String.format(URL_EXPERIENCE, experienceId))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
+                .content(this.json(experienceDto))
+                .contentType(contentType))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
+    }
+
+    @Test
+    public void testPutExperience_cannotEditNonExistingExperience() throws Exception {
+        Long experienceId = 1504648460L;
+        Assert.assertNull(experienceRepository.findOne(experienceId));
+
+        ExperienceDto experienceDto = new ExperienceDto();
+        experienceDto.setId(experienceId);
+
+        mockMvc.perform(put(String.format(URL_EXPERIENCE, experienceId))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
+                .content(this.json(experienceDto))
+                .contentType(contentType))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
+                .andDo(print());
+    }
+
+    // can edit own experience
+
+    @Test
+    public void testPutExperience_canEditOwnExperience_sameValues() throws Exception {
+        Experience experience = createExperienceForUser(CultureLogTestConfiguration.getUser1Id());
+        Long experienceId = experience.getId();
+
+        ExperienceDto experienceDto = ExperienceUtils.toExperienceDto(experience);
+
+        MvcResult result = mockMvc.perform(put(String.format(URL_EXPERIENCE, experienceId))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
+                .content(this.json(experienceDto))
+                .contentType(contentType))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Experience experienceAfterwards = experienceRepository.findOne(experienceId);
+        ReadContext ctx = JsonPath.parse(result.getResponse().getContentAsString());
+        assertExperienceJson(experienceAfterwards, ctx.read("$"));
+        Assert.assertEquals(experienceDto.getName(), experienceAfterwards.getName());
+    }
+
+    @Test
+    public void testPutExperience_canEditOwnExperience_changeName() throws Exception {
+        Experience experience = createExperienceForUser(CultureLogTestConfiguration.getUser1Id());
+        Long experienceId = experience.getId();
+
+        ExperienceDto experienceDto = ExperienceUtils.toExperienceDto(experience);
+        experienceDto.setName(experience.getName() + "new");
+
+        MvcResult result = mockMvc.perform(put(String.format(URL_EXPERIENCE, experienceId))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
+                .content(this.json(experienceDto))
+                .contentType(contentType))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Experience experienceAfterwards = experienceRepository.findOne(experienceId);
+        ReadContext ctx = JsonPath.parse(result.getResponse().getContentAsString());
+        assertExperienceJson(experienceAfterwards, ctx.read("$"));
+        Assert.assertEquals(experienceDto.getName(), experienceAfterwards.getName());
+    }
+
+    @Test
+    public void testPutExperience_canEditOwnExperience_setNameNull_willFail() throws Exception {
+        Experience experience = createExperienceForUser(CultureLogTestConfiguration.getUser1Id());
+        Long experienceId = experience.getId();
+
+        ExperienceDto experienceDto = ExperienceUtils.toExperienceDto(experience);
+        experienceDto.setName(null);
+
+        mockMvc.perform(put(String.format(URL_EXPERIENCE, experienceId))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
+                .content(this.json(experienceDto))
+                .contentType(contentType))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE));
+
+        Experience experienceAfterwards = experienceRepository.findOne(experienceId);
+        Assert.assertEquals(experience.getName(), experienceAfterwards.getName());
+    }
+
+    //TODO: test change of other attributes
+
     // helper methods
 
     private ExperienceDto creatExperienceToSave(String name, Long experienceTypeId) {
@@ -589,15 +758,15 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
         Assert.assertEquals(experience.getComment(), experienceJson.get("comment"));
     }
 
-    public Experience createExperienceToSave(String name, User user, Long experienceTypeId, Long locationId, Moment moment, String comment) {
+    public Experience createExperienceToSave(String name, User user, Long experienceTypeId, Long experienceId, Moment moment, String comment) {
         Experience experience = new Experience();
         experience.setName(name);
         experience.setUser(user);
         if (experienceTypeId != null) {
             experience.setType(experienceTypeRepository.findOne(experienceTypeId));
         }
-        if (locationId != null) {
-            experience.setLocation(locationRepository.findOne(locationId));
+        if (experienceId != null) {
+            experience.setLocation(locationRepository.findOne(experienceId));
         }
         experience.setMoment(moment);
         experience.setComment(comment);
@@ -645,9 +814,20 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
         }
     }
 
-    private void saveExperience(Experience experienceToSave, Map<Date, Experience> savedExperiences) throws CultureLogException {
+    private Experience saveExperience(Experience experienceToSave, Map<Date, Experience> savedExperiences) throws CultureLogException {
         Experience experience = experienceService.save(experienceToSave);
-        savedExperiences.put(experience.getMoment().getSortDate(), experience);
+        if (savedExperiences != null) {
+            savedExperiences.put(experience.getMoment().getSortDate(), experience);
+        }
+        return experience;
+    }
+
+    private Experience createExperienceForUser(Long userId) throws CultureLogException {
+        User user1 = userRepository.findOne(userId);
+        Long experienceTypeFilmId = CultureLogTestConfiguration.getGlobalExperienceTypeIdFilm();
+        Long locationKinepolisId = CultureLogTestConfiguration.getGlobalLocationIdKinepolis();
+        return saveExperience(createExperienceToSave("testOne", user1, experienceTypeFilmId, locationKinepolisId,
+                createDateMoment(DisplayDateType.DATE, 0), "ok"), null);
     }
 
     /**

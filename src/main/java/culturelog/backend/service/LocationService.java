@@ -21,5 +21,5 @@ public interface LocationService {
 
     Page<Location> getLocationsOfUserByUserId(Long userId, boolean includeGeneral, Pageable pageable);
 
-    Location getById(Long userId);
+    Location getById(Long locationId);
 }
