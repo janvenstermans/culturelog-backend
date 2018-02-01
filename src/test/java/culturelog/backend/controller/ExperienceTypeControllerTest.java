@@ -7,14 +7,20 @@ import culturelog.backend.configuration.CultureLogTestConfiguration;
 import culturelog.backend.domain.ExperienceType;
 import culturelog.backend.domain.User;
 import culturelog.backend.dto.ExperienceTypeDto;
+import culturelog.backend.exception.CultureLogException;
 import culturelog.backend.repository.ExperienceTypeRepository;
 import culturelog.backend.repository.UserRepository;
+import culturelog.backend.service.ExperienceTypeService;
 import net.minidev.json.JSONArray;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -22,11 +28,14 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -56,17 +65,24 @@ public class ExperienceTypeControllerTest extends ControllerTestAbstract {
     @Autowired
     private ExperienceTypeRepository experienceTypeRepository;
 
+    @Autowired
+    private ExperienceTypeService experienceTypeService;
+
     private static final String URL_EXPERIENCE_TYPES = "/experienceTypes";
     private static final String URL_EXPERIENCE_TYPES_ONE = "/experienceTypes/%d";
 
+    // -----------------------------------------
     // url /experienceTypes OPTIONS
+    // -----------------------------------------
 
     @Test
     public void testExperienceTypesUrl_allowedMethods() throws Exception {
         testUrlAllowedMethods(URL_EXPERIENCE_TYPES, HttpMethod.POST, HttpMethod.GET);
     }
 
+    // -----------------------------------------
     // url /experienceTypes POST
+    // -----------------------------------------
 
     @Test
     public void testCreateExperienceType_notAuthorized() throws Exception {
@@ -80,7 +96,7 @@ public class ExperienceTypeControllerTest extends ControllerTestAbstract {
 
     @Test
     public void testCreateExperienceType_withId() throws Exception {
-        List<ExperienceType> experienceTypeListBefore = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<ExperienceType> experienceTypeListBefore = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(0, experienceTypeListBefore.size());
 
         ExperienceTypeDto experienceTypeDto = new ExperienceTypeDto();
@@ -94,13 +110,13 @@ public class ExperienceTypeControllerTest extends ControllerTestAbstract {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
                 .andDo(print());
 
-        List<ExperienceType> experienceTypeList = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<ExperienceType> experienceTypeList = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(0, experienceTypeList.size());
     }
 
     @Test
     public void testCreateExperienceType_noName() throws Exception {
-        List<ExperienceType> experienceTypeListBefore = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<ExperienceType> experienceTypeListBefore = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(0, experienceTypeListBefore.size());
 
         ExperienceTypeDto experienceTypeDto = new ExperienceTypeDto();
@@ -113,13 +129,13 @@ public class ExperienceTypeControllerTest extends ControllerTestAbstract {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
                 .andDo(print());
 
-        List<ExperienceType> experienceTypeList = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<ExperienceType> experienceTypeList = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(0, experienceTypeList.size());
     }
 
     @Test
     public void testCreateExperienceType_nameNew_minimum() throws Exception {
-        List<ExperienceType> experienceTypeListBefore = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<ExperienceType> experienceTypeListBefore = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(0, experienceTypeListBefore.size());
 
         String experienceTypeName = "experienceTypeName1";
@@ -132,7 +148,7 @@ public class ExperienceTypeControllerTest extends ControllerTestAbstract {
                 .contentType(contentType))
                 .andExpect(status().isCreated());
 
-        List<ExperienceType> experienceTypeList = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<ExperienceType> experienceTypeList = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(1, experienceTypeList.size());
         ExperienceType experienceTypeSaved = experienceTypeList.get(0);
         Assert.assertEquals(experienceTypeName, experienceTypeSaved.getName());
@@ -140,7 +156,7 @@ public class ExperienceTypeControllerTest extends ControllerTestAbstract {
 
     @Test
     public void testCreateExperienceType_nameAlreadyExistsForUser() throws Exception {
-        List<ExperienceType> experienceTypeListBefore = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<ExperienceType> experienceTypeListBefore = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(0, experienceTypeListBefore.size());
 
         String experienceTypeName = "experienceTypeName1";
@@ -161,7 +177,7 @@ public class ExperienceTypeControllerTest extends ControllerTestAbstract {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
                 .andDo(print());
 
-        List<ExperienceType> experienceTypeList = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<ExperienceType> experienceTypeList = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(1, experienceTypeList.size());
         ExperienceType experienceTypeSaved = experienceTypeList.get(0);
         Assert.assertEquals(experienceTypeName, experienceTypeSaved.getName());
@@ -169,7 +185,7 @@ public class ExperienceTypeControllerTest extends ControllerTestAbstract {
 
     @Test
     public void testCreateExperienceType_nameNew_allFields() throws Exception {
-        List<ExperienceType> experienceTypeListBefore = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<ExperienceType> experienceTypeListBefore = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(0, experienceTypeListBefore.size());
 
         String experienceTypeName = "experienceTypeName1";
@@ -189,7 +205,7 @@ public class ExperienceTypeControllerTest extends ControllerTestAbstract {
                 .andExpect(jsonPath("$.description", is(description)))
                 .andExpect(jsonPath("$.global", is(false)));
 
-        List<ExperienceType> experienceTypeList = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<ExperienceType> experienceTypeList = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(1, experienceTypeList.size());
         ExperienceType experienceTypeSaved = experienceTypeList.get(0);
         Assert.assertEquals(experienceTypeName, experienceTypeSaved.getName());
@@ -200,14 +216,14 @@ public class ExperienceTypeControllerTest extends ControllerTestAbstract {
 
     @Test
     public void testCreateExperienceType_nameNew_sameAsGlobalAllowed() throws Exception {
-        List<ExperienceType> experienceTypeListBefore = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<ExperienceType> experienceTypeListBefore = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(0, experienceTypeListBefore.size());
 
         String experienceTypeName = CultureLogTestConfiguration.GLOBAL_EXPERIENCETYPE_NAME_BOOK;
         ExperienceTypeDto experienceTypeDto = new ExperienceTypeDto();
         experienceTypeDto.setName(experienceTypeName);
 
-        Assert.assertEquals(1, experienceTypeRepository.findByName(experienceTypeName).size());
+        Assert.assertEquals(1, experienceTypeRepository.findByName(experienceTypeName, new PageRequest(0, 20)).getContent().size());
 
         mockMvc.perform(post(URL_EXPERIENCE_TYPES)
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
@@ -215,15 +231,17 @@ public class ExperienceTypeControllerTest extends ControllerTestAbstract {
                 .contentType(contentType))
                 .andExpect(status().isCreated());
 
-        List<ExperienceType> experienceTypeList = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<ExperienceType> experienceTypeList = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(1, experienceTypeList.size());
         ExperienceType experienceTypeSaved = experienceTypeList.get(0);
         Assert.assertEquals(experienceTypeName, experienceTypeSaved.getName());
 
-        Assert.assertEquals(2, experienceTypeRepository.findByName(experienceTypeName).size());
+        Assert.assertEquals(2, experienceTypeRepository.findByName(experienceTypeName, new PageRequest(0, 20)).getContent().size());
     }
 
-    // url /experienceTypes GET
+    // -----------------------------------------
+    // url /experienceTypes?page=X&size=Y GET
+    // -----------------------------------------
 
     @Test
     public void testGetExperienceTypes_notAuthorized() throws Exception {
@@ -232,61 +250,106 @@ public class ExperienceTypeControllerTest extends ControllerTestAbstract {
     }
 
     @Test
-    public void testGetExperienceTypes_noOwnExperienceTypes() throws Exception {
-        List<ExperienceType> experienceTypeListUser = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
-        Assert.assertEquals(0, experienceTypeListUser.size());
-        List<ExperienceType> generalExperienceTypes = experienceTypeRepository.findByUserId(null);
-        List<Long> expectedIdList = generalExperienceTypes.stream().map(experienceType -> experienceType.getId()).collect(Collectors.toList());
+    public void testGetExperienceTypes_noExperienceTypes() throws Exception {
+        int page = 0;
+        int size = 3;
+        Pageable pageable = new PageRequest(page, size);
+        Page<ExperienceType> experienceTypeListUser = experienceTypeRepository.findByUserIdIncludingGlobal(CultureLogTestConfiguration.getUser1Id(), pageable);
+        Assert.assertEquals(2L, experienceTypeListUser.getTotalElements());
+        List<Long> expectedIdList = experienceTypeListUser.getContent().stream().map(experienceType -> experienceType.getId()).collect(Collectors.toList());;
 
-        MvcResult result = mockMvc.perform(get(URL_EXPERIENCE_TYPES)
+        executeAndAssertGetExperienceTypePage(page, size, null, false, expectedIdList, experienceTypeListUser);
+    }
+
+    @Test
+    public void testGetExperienceTypes_defaultPagingInfo() throws Exception {
+        String direction0 = ExperienceTypeController.DEFAULT_SORT_ASC_0 ? Sort.Direction.ASC.name() : Sort.Direction.DESC.name();
+        String direction1 = ExperienceTypeController.DEFAULT_SORT_ASC_1 ? Sort.Direction.ASC.name() : Sort.Direction.DESC.name();
+        mockMvc.perform(get(URL_EXPERIENCE_TYPES)
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(expectedIdList.size())))
-//                .andDo(MockMvcResultHandlers.print())
-                .andReturn();
-
-        ReadContext ctx = JsonPath.parse(result.getResponse().getContentAsString());
-        // test all experienceTypes id's are present
-        assertIdList(expectedIdList, ctx.read("$.[*].id"));
-        for (Long expectedId : expectedIdList) {
-            assertExperienceType(experienceTypeRepository.findOne(expectedId), ctx.read(String.format("$.[?(@.id==%d)]", expectedId)));
-        }
+                .andDo(print())
+                .andExpect(jsonPath("$.number", equalTo(ExperienceTypeController.DEFAULT_PAGE_NUMBER)))
+                .andExpect(jsonPath("$.size", equalTo(ExperienceTypeController.DEFAULT_PAGE_SIZE)))
+                .andExpect(jsonPath("$.sort", hasSize(2)))
+                .andExpect(jsonPath("$.sort[0].property", equalTo(ExperienceTypeController.DEFAULT_SORT_COLUMN_0)))
+                .andExpect(jsonPath("$.sort[0].direction", equalTo(direction0)))
+                .andExpect(jsonPath("$.sort[0].ascending", equalTo(ExperienceTypeController.DEFAULT_SORT_ASC_0)))
+                .andExpect(jsonPath("$.sort[1].property", equalTo(ExperienceTypeController.DEFAULT_SORT_COLUMN_1)))
+                .andExpect(jsonPath("$.sort[1].direction", equalTo(direction1)))
+                .andExpect(jsonPath("$.sort[1].ascending", equalTo(ExperienceTypeController.DEFAULT_SORT_ASC_1)))
+        ;
     }
 
     @Test
     public void testGetExperienceTypes_withOwnExperienceTypes() throws Exception {
-        User user1 = userRepository.findOne(CultureLogTestConfiguration.getUser1Id());
-        experienceTypeRepository.save(createExperienceTypeToSave("testOne", user1));
-        experienceTypeRepository.save(createExperienceTypeToSave("testTwo", user1));
-        experienceTypeRepository.save(createExperienceTypeToSave("testThree", user1));
-        List<ExperienceType> experienceTypeListUser = experienceTypeRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
-        Assert.assertEquals(3, experienceTypeListUser.size());
-        List<ExperienceType> generalExperienceTypes = experienceTypeRepository.findByUserId(null);
-        List<Long> expectedIdList = Stream.concat(experienceTypeListUser.stream(), generalExperienceTypes.stream()).map(experienceType -> experienceType.getId()).collect(Collectors.toList());
+        List<ExperienceType> savedExperienceTypesIncludingGlobal = createExperienceTypesForUser(CultureLogTestConfiguration.getUser1Id());
 
-        MvcResult result = mockMvc.perform(get(URL_EXPERIENCE_TYPES)
-                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(expectedIdList.size())))
-//                .andDo(MockMvcResultHandlers.print())
-                .andReturn();
+        int pageSize = 3;
+        String sort = null; //default
+        Page<ExperienceType> experienceTypePage0 = experienceTypeRepository.findByUserIdIncludingGlobal(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, pageSize));
+        Page<ExperienceType> experienceTypePage1 = experienceTypeRepository.findByUserIdIncludingGlobal(CultureLogTestConfiguration.getUser1Id(), new PageRequest(1, pageSize));
 
-        ReadContext ctx = JsonPath.parse(result.getResponse().getContentAsString());
-        // test all experienceTypes id's are present
-        assertIdList(expectedIdList, ctx.read("$.[*].id"));
-        for (Long expectedId : expectedIdList) {
-            assertExperienceType(experienceTypeRepository.findOne(expectedId), ctx.read(String.format("$.[?(@.id==%d)]", expectedId)));
-        }
+        //determine ids in pages
+        List<Long> savedExpereinceTypeIdsOrderedDefault = savedExperienceTypesIncludingGlobal.stream().map(experienceType -> experienceType.getId()).collect(Collectors.toList());
+        List<Long> experienceTypeIdListPage0 = savedExpereinceTypeIdsOrderedDefault.subList(0, 3);
+        List<Long> experienceTypeIdListPage1 = savedExpereinceTypeIdsOrderedDefault.subList(3, 5);
+
+        executeAndAssertGetExperienceTypePage(0, pageSize, sort, false, experienceTypeIdListPage0, experienceTypePage0);
+        executeAndAssertGetExperienceTypePage(1, pageSize, sort, false, experienceTypeIdListPage1, experienceTypePage1);
     }
 
+    @Test
+    public void testGetExperienceTypes_withOwnExperienceTypes_sortByExperienceTypeIdAsc() throws Exception {
+        List<ExperienceType> savedExperienceTypesIncludingGlobal = createExperienceTypesForUser(CultureLogTestConfiguration.getUser1Id());
+
+        int pageSize = 3;
+        String sort = "id";
+        Page<ExperienceType> experienceTypePage0 = experienceTypeRepository.findByUserIdIncludingGlobal(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, pageSize));
+        Page<ExperienceType> experienceTypePage1 = experienceTypeRepository.findByUserIdIncludingGlobal(CultureLogTestConfiguration.getUser1Id(), new PageRequest(1, pageSize));
+
+        //determine ids in pages
+        List<Long> savedExpereinceTypeIdsOrderedDefault = savedExperienceTypesIncludingGlobal.stream().map(experienceType -> experienceType.getId()).collect(Collectors.toList());
+        Collections.sort(savedExpereinceTypeIdsOrderedDefault);
+        List<Long> experienceTypeIdListPage0 = savedExpereinceTypeIdsOrderedDefault.subList(0, 3);
+        List<Long> experienceTypeIdListPage1 = savedExpereinceTypeIdsOrderedDefault.subList(3, 5);
+
+        executeAndAssertGetExperienceTypePage(0, pageSize, sort, false, experienceTypeIdListPage0, experienceTypePage0);
+        executeAndAssertGetExperienceTypePage(1, pageSize, sort, false, experienceTypeIdListPage1, experienceTypePage1);
+    }
+
+    @Test
+    public void testGetExperienceTypes_withOwnExperienceTypes_sortByExperienceTypeIdDesc() throws Exception {
+        List<ExperienceType> savedExperienceTypesIncludingGlobal = createExperienceTypesForUser(CultureLogTestConfiguration.getUser1Id());
+
+        int pageSize = 3;
+        String sort = "id";
+        Page<ExperienceType> experienceTypePage0 = experienceTypeRepository.findByUserIdIncludingGlobal(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, pageSize));
+        Page<ExperienceType> experienceTypePage1 = experienceTypeRepository.findByUserIdIncludingGlobal(CultureLogTestConfiguration.getUser1Id(), new PageRequest(1, pageSize));
+
+        //determine ids in pages
+        List<Long> savedExpereinceTypeIdsOrderedDefault = savedExperienceTypesIncludingGlobal.stream().map(experienceType -> experienceType.getId()).collect(Collectors.toList());
+        Collections.sort(savedExpereinceTypeIdsOrderedDefault);
+        Collections.reverse(savedExpereinceTypeIdsOrderedDefault);
+        List<Long> experienceTypeIdListPage0 = savedExpereinceTypeIdsOrderedDefault.subList(0, 3);
+        List<Long> experienceTypeIdListPage1 = savedExpereinceTypeIdsOrderedDefault.subList(3, 5);
+
+        executeAndAssertGetExperienceTypePage(0, pageSize, sort, true, experienceTypeIdListPage0, experienceTypePage0);
+        executeAndAssertGetExperienceTypePage(1, pageSize, sort, true, experienceTypeIdListPage1, experienceTypePage1);
+    }
+
+    // -----------------------------------------
     // url /experienceTypes/{experienceTypeId} OPTIONS
+    // -----------------------------------------
 
     @Test
     public void testExperienceTypesOneUrl_allowedMethods() throws Exception {
         testUrlAllowedMethods(String.format(URL_EXPERIENCE_TYPES_ONE, CultureLogTestConfiguration.getGlobalExperienceTypeIdBook()), HttpMethod.GET, HttpMethod.PUT);
     }
 
+    // -----------------------------------------
     // url /experienceTypes/{experienceTypeId} GET
+    // -----------------------------------------
 
     @Test
     public void testGetExperienceTypesOne_notAuthorized() throws Exception {
@@ -345,7 +408,9 @@ public class ExperienceTypeControllerTest extends ControllerTestAbstract {
                 .andDo(print());
     }
 
+    // -----------------------------------------
     // url /experienceTypes/{experienceTypeId} PUT
+    // -----------------------------------------
 
     @Test
     public void testPutExperienceTypesOne_notAuthorized() throws Exception {
@@ -510,7 +575,9 @@ public class ExperienceTypeControllerTest extends ControllerTestAbstract {
                 .andDo(print());
     }
 
+    // -----------------------------------------
     // helper methods
+    // -----------------------------------------
 
     public static ExperienceType createExperienceTypeToSave(String name, User user) {
         ExperienceType experienceType = new ExperienceType();
@@ -534,5 +601,56 @@ public class ExperienceTypeControllerTest extends ControllerTestAbstract {
         Assert.assertEquals(experienceType.getName(), experienceTypeJson.get("name"));
         Assert.assertEquals(experienceType.getDescription(), experienceTypeJson.get("description"));
         Assert.assertEquals(experienceType.getUser() == null, experienceTypeJson.get("global"));
+    }
+
+    private void executeAndAssertGetExperienceTypePage(int page, int pageSize, String sort, boolean desc, List<Long> expectedIdList, Page pageInfoExpected) throws Exception {
+        MvcResult resultPage = mockMvc.perform(get(getUrlPaged(URL_EXPERIENCE_TYPES, page, pageSize, sort, desc))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.content", hasSize(expectedIdList.size())))
+                //paging info
+                .andExpect(jsonPath("$.totalElements", equalTo((int) pageInfoExpected.getTotalElements())))
+                .andExpect(jsonPath("$.totalPages", equalTo(pageInfoExpected.getTotalPages())))
+                .andExpect(jsonPath("$.first", equalTo(pageInfoExpected.isFirst())))
+                .andExpect(jsonPath("$.last", equalTo(pageInfoExpected.isLast())))
+                .andExpect(jsonPath("$.number", equalTo(pageInfoExpected.getNumber())))
+                .andExpect(jsonPath("$.numberOfElements", equalTo(pageInfoExpected.getNumberOfElements())))
+                .andExpect(jsonPath("$.size", equalTo(pageInfoExpected.getSize())))
+                .andReturn();
+
+        ReadContext ctx = JsonPath.parse(resultPage.getResponse().getContentAsString());
+        // test all experience id's are present
+        assertIdList(expectedIdList, ctx.read("$.content[*].id"));
+        for (Long expectedId : expectedIdList) {
+            assertExperienceType(experienceTypeRepository.findOne(expectedId), ctx.read(String.format("$.content.[?(@.id==%d)]", expectedId)));
+        }
+    }
+
+    /**
+     *
+     * @param userId
+     * @return ordered list, by name
+     * @throws CultureLogException
+     */
+    private List<ExperienceType> createExperienceTypesForUser(Long userId) throws CultureLogException {
+        List<ExperienceType> savedExperienceTypes = new ArrayList<>();
+        User user1 = userRepository.findOne(userId);
+        savedExperienceTypes.add(experienceTypeService.getById(CultureLogTestConfiguration.getGlobalExperienceTypeIdFilm()));
+        savedExperienceTypes.add(experienceTypeService.getById(CultureLogTestConfiguration.getGlobalExperienceTypeIdBook()));
+        savedExperienceTypes.add(experienceTypeService.save(createExperienceTypeToSave("theater", user1)));
+        savedExperienceTypes.add(experienceTypeService.save(createExperienceTypeToSave("magazine", user1)));
+        savedExperienceTypes.add(experienceTypeService.save(createExperienceTypeToSave(savedExperienceTypes.get(0).getName(), user1)));
+        Collections.sort(savedExperienceTypes, new Comparator<ExperienceType>() {
+            @Override
+            public int compare(ExperienceType experienceType, ExperienceType t1) {
+                int compareName = experienceType.getName().compareTo(t1.getName());
+                if (compareName != 0) {
+                    return compareName;
+                }
+                return experienceType.getId().compareTo(t1.getId());
+            }
+        });
+        return savedExperienceTypes;
     }
 }

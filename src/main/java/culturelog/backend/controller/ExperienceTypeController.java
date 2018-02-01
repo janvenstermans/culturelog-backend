@@ -12,6 +12,11 @@ import culturelog.backend.service.MessageService;
 import culturelog.backend.utils.ExperienceTypeUtils;
 import culturelog.backend.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,6 +41,13 @@ public class ExperienceTypeController {
     @Autowired
     private MessageService messageService;
 
+    public static final int DEFAULT_PAGE_NUMBER = 0;
+    public static final int DEFAULT_PAGE_SIZE = 20;
+    public static final String DEFAULT_SORT_COLUMN_0 = "name";
+    public static final boolean DEFAULT_SORT_ASC_0 = true;
+    public static final String DEFAULT_SORT_COLUMN_1 = "id";
+    public static final boolean DEFAULT_SORT_ASC_1 = true;
+
     @RequestMapping(method = RequestMethod.POST)
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createExperienceType(@RequestBody ExperienceTypeDto experienceTypeDto, Locale locale) {
@@ -55,10 +67,14 @@ public class ExperienceTypeController {
 
     @RequestMapping(method = RequestMethod.GET)
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getExperienceTypesOfUserAndGlobalExperienceTypes() {
+    public ResponseEntity<?> getExperienceTypesOfUserAndGlobalExperienceTypes(@PageableDefault(page = DEFAULT_PAGE_NUMBER, size = DEFAULT_PAGE_SIZE)
+                                                                                  @SortDefault.SortDefaults({
+                                                                                          @SortDefault(sort = DEFAULT_SORT_COLUMN_0, direction = Sort.Direction.ASC),
+                                                                                          @SortDefault(sort = DEFAULT_SORT_COLUMN_1, direction = Sort.Direction.ASC)
+                                                                                  }) Pageable pageable) {
         Long userId = securityService.getLoggedInUserId();
-        List<ExperienceType> experienceTypeList = experienceTypeService.getExperienceTypesOfUserByUserId(userId, true);
-        return ResponseEntity.ok(ExperienceTypeUtils.toExperienceTypeDtoList(experienceTypeList));
+        Page<ExperienceType> experienceTypePage = experienceTypeService.getExperienceTypesOfUserByUserId(userId, true, pageable);
+        return ResponseEntity.ok(experienceTypePage.map(ExperienceTypeUtils::toExperienceTypeDto));
     }
 
     @RequestMapping(value = "/{experienceTypeId}", method = RequestMethod.GET)

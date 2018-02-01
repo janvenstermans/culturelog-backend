@@ -1,6 +1,8 @@
 package culturelog.backend.repository;
 
 import culturelog.backend.domain.ExperienceType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -12,10 +14,10 @@ import java.util.Optional;
  */
 public interface ExperienceTypeRepository extends JpaRepository<ExperienceType, Long> {
 
-    List<ExperienceType> findByUserId(Long userId);
+    Page<ExperienceType> findByUserId(Long userId, Pageable pageable);
 
     @Query("Select m from ExperienceType m where m.user is null or m.user.id = ?1")
-    List<ExperienceType> findByUserIdIncludingGlobal(Long userId);
+    Page<ExperienceType> findByUserIdIncludingGlobal(Long userId, Pageable pageable);
 
     Optional<ExperienceType> findByUserIdAndName(Long userId, String naam);
 
@@ -24,5 +26,5 @@ public interface ExperienceTypeRepository extends JpaRepository<ExperienceType, 
      * @param naam
      * @return
      */
-    List<ExperienceType> findByName(String naam);
+    Page<ExperienceType> findByName(String naam, Pageable pageable);
 }

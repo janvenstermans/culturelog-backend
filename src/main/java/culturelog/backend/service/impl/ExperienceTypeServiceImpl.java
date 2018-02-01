@@ -6,6 +6,8 @@ import culturelog.backend.exception.CultureLogExceptionKey;
 import culturelog.backend.repository.ExperienceTypeRepository;
 import culturelog.backend.service.ExperienceTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,11 +37,11 @@ public class ExperienceTypeServiceImpl implements ExperienceTypeService {
     }
 
     @Override
-    public List<ExperienceType> getExperienceTypesOfUserByUserId(Long userId, boolean includeGeneral) {
+    public Page<ExperienceType> getExperienceTypesOfUserByUserId(Long userId, boolean includeGeneral, Pageable pageable) {
         if (includeGeneral) {
-            return experienceTypeRepository.findByUserIdIncludingGlobal(userId);
+            return experienceTypeRepository.findByUserIdIncludingGlobal(userId, pageable);
         }
-        return experienceTypeRepository.findByUserId(userId);
+        return experienceTypeRepository.findByUserId(userId, pageable);
     }
 
     @Override
