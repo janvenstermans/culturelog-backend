@@ -6,6 +6,8 @@ import culturelog.backend.exception.CultureLogExceptionKey;
 import culturelog.backend.repository.LocationRepository;
 import culturelog.backend.service.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,11 +37,11 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public List<Location> getLocationsOfUserByUserId(Long userId, boolean includeGeneral) {
+    public Page<Location> getLocationsOfUserByUserId(Long userId, boolean includeGeneral, Pageable pageable) {
         if (includeGeneral) {
-            return locationRepository.findByUserIdIncludingGlobal(userId);
+            return locationRepository.findByUserIdIncludingGlobal(userId, pageable);
         }
-        return locationRepository.findByUserId(userId);
+        return locationRepository.findByUserId(userId, pageable);
     }
 
     @Override

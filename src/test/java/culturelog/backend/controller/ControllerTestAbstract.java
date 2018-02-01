@@ -84,4 +84,26 @@ public abstract class ControllerTestAbstract {
             Assert.assertTrue(expectedIdList.contains(value.longValue()));
         }
     }
+
+    protected static String getUrlPaged(String url, Integer page, Integer size, String sort, boolean desc) {
+        if (page == null && size == null && sort == null) {
+            return url;
+        }
+        StringBuilder stringBuilder = new StringBuilder(url).append('?');
+        if (page != null) {
+            stringBuilder.append("page=").append(page).append('&');
+        }
+        if (size != null) {
+            stringBuilder.append("size=").append(size).append('&');
+        }
+        if (sort != null) {
+            stringBuilder.append("sort=").append(sort);
+            if (desc) {
+                stringBuilder.append(",desc");
+            }
+            stringBuilder.append('&');
+        }
+        stringBuilder.setLength(stringBuilder.length() - 1);
+        return stringBuilder.toString();
+    }
 }

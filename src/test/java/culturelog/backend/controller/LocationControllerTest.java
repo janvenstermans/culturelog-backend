@@ -7,14 +7,20 @@ import culturelog.backend.configuration.CultureLogTestConfiguration;
 import culturelog.backend.domain.Location;
 import culturelog.backend.domain.User;
 import culturelog.backend.dto.LocationDto;
+import culturelog.backend.exception.CultureLogException;
 import culturelog.backend.repository.LocationRepository;
 import culturelog.backend.repository.UserRepository;
+import culturelog.backend.service.LocationService;
 import net.minidev.json.JSONArray;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -22,11 +28,14 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -56,6 +65,9 @@ public class LocationControllerTest extends ControllerTestAbstract {
     @Autowired
     private LocationRepository locationRepository;
 
+    @Autowired
+    private LocationService locationService;
+
     private static final String URL_LOCATIONS = "/locations";
     private static final String URL_LOCATIONS_ONE = "/locations/%d";
 
@@ -66,7 +78,9 @@ public class LocationControllerTest extends ControllerTestAbstract {
         testUrlAllowedMethods(URL_LOCATIONS, HttpMethod.POST, HttpMethod.GET);
     }
 
+    // -----------------------------------------
     // url /locations POST
+    // -----------------------------------------
 
     @Test
     public void testCreateLocation_notAuthorized() throws Exception {
@@ -80,7 +94,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
 
     @Test
     public void testCreateLocation_withId() throws Exception {
-        List<Location> locationListBefore = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<Location> locationListBefore = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(0, locationListBefore.size());
 
         LocationDto locationDto = new LocationDto();
@@ -94,13 +108,13 @@ public class LocationControllerTest extends ControllerTestAbstract {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
                 .andDo(print());
 
-        List<Location> locationList = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<Location> locationList = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(0, locationList.size());
     }
 
     @Test
     public void testCreateLocation_noName() throws Exception {
-        List<Location> locationListBefore = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<Location> locationListBefore = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(0, locationListBefore.size());
 
         LocationDto locationDto = new LocationDto();
@@ -113,13 +127,13 @@ public class LocationControllerTest extends ControllerTestAbstract {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
                 .andDo(print());
 
-        List<Location> locationList = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<Location> locationList = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(0, locationList.size());
     }
 
     @Test
     public void testCreateLocation_nameNew_minimum() throws Exception {
-        List<Location> locationListBefore = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<Location> locationListBefore = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(0, locationListBefore.size());
 
         String locationName = "locationName1";
@@ -132,7 +146,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
                 .contentType(contentType))
                 .andExpect(status().isCreated());
 
-        List<Location> locationList = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<Location> locationList = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(1, locationList.size());
         Location locationSaved = locationList.get(0);
         Assert.assertEquals(locationName, locationSaved.getName());
@@ -140,7 +154,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
 
     @Test
     public void testCreateLocation_nameAlreadyExistsForUser() throws Exception {
-        List<Location> locationListBefore = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<Location> locationListBefore = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(0, locationListBefore.size());
 
         String locationName = "locationName1";
@@ -161,7 +175,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE))
                 .andDo(print());
 
-        List<Location> locationList = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<Location> locationList = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(1, locationList.size());
         Location locationSaved = locationList.get(0);
         Assert.assertEquals(locationName, locationSaved.getName());
@@ -169,7 +183,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
 
     @Test
     public void testCreateLocation_nameNew_allFields() throws Exception {
-        List<Location> locationListBefore = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<Location> locationListBefore = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(0, locationListBefore.size());
 
         String locationName = "locationName1";
@@ -189,7 +203,7 @@ public class LocationControllerTest extends ControllerTestAbstract {
                 .andExpect(jsonPath("$.description", is(description)))
                 .andExpect(jsonPath("$.global", is(false)));
 
-        List<Location> locationList = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<Location> locationList = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(1, locationList.size());
         Location locationSaved = locationList.get(0);
         Assert.assertEquals(locationName, locationSaved.getName());
@@ -200,14 +214,14 @@ public class LocationControllerTest extends ControllerTestAbstract {
 
     @Test
     public void testCreateLocation_nameNew_sameAsGlobalAllowed() throws Exception {
-        List<Location> locationListBefore = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<Location> locationListBefore = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(0, locationListBefore.size());
 
         String locationName = CultureLogTestConfiguration.GLOBAL_LOCATION_NAME_VOORUIT;
         LocationDto locationDto = new LocationDto();
         locationDto.setName(locationName);
 
-        Assert.assertEquals(1, locationRepository.findByName(locationName).size());
+        Assert.assertEquals(1, locationRepository.findByName(locationName, new PageRequest(0, 20)).getContent().size());
 
         mockMvc.perform(post(URL_LOCATIONS)
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS))
@@ -215,15 +229,17 @@ public class LocationControllerTest extends ControllerTestAbstract {
                 .contentType(contentType))
                 .andExpect(status().isCreated());
 
-        List<Location> locationList = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
+        List<Location> locationList = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, 20)).getContent();
         Assert.assertEquals(1, locationList.size());
         Location locationSaved = locationList.get(0);
         Assert.assertEquals(locationName, locationSaved.getName());
 
-        Assert.assertEquals(2, locationRepository.findByName(locationName).size());
+        Assert.assertEquals(2, locationRepository.findByName(locationName, new PageRequest(0, 20)).getContent().size());
     }
 
-    // url /locations GET
+    // -----------------------------------------
+    // url /locations?page=X&size=Y GET
+    // -----------------------------------------
 
     @Test
     public void testGetLocations_notAuthorized() throws Exception {
@@ -233,60 +249,105 @@ public class LocationControllerTest extends ControllerTestAbstract {
 
     @Test
     public void testGetLocations_noOwnLocations() throws Exception {
-        List<Location> locationListUser = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
-        Assert.assertEquals(0, locationListUser.size());
-        List<Location> generalLocations = locationRepository.findByUserId(null);
-        List<Long> expectedIdList = generalLocations.stream().map(location -> location.getId()).collect(Collectors.toList());
+        int page = 0;
+        int size = 3;
+        Pageable pageable = new PageRequest(page, size);
+        Page<Location> locationListUser = locationRepository.findByUserIdIncludingGlobal(CultureLogTestConfiguration.getUser1Id(), pageable);
+        Assert.assertEquals(2L, locationListUser.getTotalElements());
+        List<Long> expectedIdList = locationListUser.getContent().stream().map(location -> location.getId()).collect(Collectors.toList());;
 
-        MvcResult result = mockMvc.perform(get(URL_LOCATIONS)
-                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(expectedIdList.size())))
-//                .andDo(MockMvcResultHandlers.print())
-                .andReturn();
-
-        ReadContext ctx = JsonPath.parse(result.getResponse().getContentAsString());
-        // test all locations id's are present
-        assertIdList(expectedIdList, ctx.read("$.[*].id"));
-        for (Long expectedId : expectedIdList) {
-            assertLocation(locationRepository.findOne(expectedId), ctx.read(String.format("$.[?(@.id==%d)]", expectedId)));
-        }
+        executeAndAssertGetLocationsPage(page, size, null, false, expectedIdList, locationListUser);
     }
 
     @Test
-    public void testGetLocations_withOwnLocations() throws Exception {
-        User user1 = userRepository.findOne(CultureLogTestConfiguration.getUser1Id());
-        locationRepository.save(createLocationToSave("testOne", user1));
-        locationRepository.save(createLocationToSave("testTwo", user1));
-        locationRepository.save(createLocationToSave("testThree", user1));
-        List<Location> locationListUser = locationRepository.findByUserId(CultureLogTestConfiguration.getUser1Id());
-        Assert.assertEquals(3, locationListUser.size());
-        List<Location> generalLocations = locationRepository.findByUserId(null);
-        List<Long> expectedIdList = Stream.concat(locationListUser.stream(), generalLocations.stream()).map(location -> location.getId()).collect(Collectors.toList());
-
-        MvcResult result = mockMvc.perform(get(URL_LOCATIONS)
+    public void testGetLocations_defaultPagingInfo() throws Exception {
+        String direction0 = LocationController.DEFAULT_SORT_ASC_0 ? Sort.Direction.ASC.name() : Sort.Direction.DESC.name();
+        String direction1 = LocationController.DEFAULT_SORT_ASC_1 ? Sort.Direction.ASC.name() : Sort.Direction.DESC.name();
+        mockMvc.perform(get(URL_LOCATIONS)
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(expectedIdList.size())))
-//                .andDo(MockMvcResultHandlers.print())
-                .andReturn();
-
-        ReadContext ctx = JsonPath.parse(result.getResponse().getContentAsString());
-        // test all locations id's are present
-        assertIdList(expectedIdList, ctx.read("$.[*].id"));
-        for (Long expectedId : expectedIdList) {
-            assertLocation(locationRepository.findOne(expectedId), ctx.read(String.format("$.[?(@.id==%d)]", expectedId)));
-        }
+                .andDo(print())
+                .andExpect(jsonPath("$.number", equalTo(LocationController.DEFAULT_PAGE_NUMBER)))
+                .andExpect(jsonPath("$.size", equalTo(LocationController.DEFAULT_PAGE_SIZE)))
+                .andExpect(jsonPath("$.sort", hasSize(2)))
+                .andExpect(jsonPath("$.sort[0].property", equalTo(LocationController.DEFAULT_SORT_COLUMN_0)))
+                .andExpect(jsonPath("$.sort[0].direction", equalTo(direction0)))
+                .andExpect(jsonPath("$.sort[0].ascending", equalTo(LocationController.DEFAULT_SORT_ASC_0)))
+                .andExpect(jsonPath("$.sort[1].property", equalTo(LocationController.DEFAULT_SORT_COLUMN_1)))
+                .andExpect(jsonPath("$.sort[1].direction", equalTo(direction1)))
+                .andExpect(jsonPath("$.sort[1].ascending", equalTo(LocationController.DEFAULT_SORT_ASC_1)))
+        ;
     }
 
+    @Test
+    public void testGetLocations_withOwnExperiences() throws Exception {
+        List<Location> savedLocationsIncludingGlobal = createLocationsForUser(CultureLogTestConfiguration.getUser1Id());
+
+        int pageSize = 3;
+        String sort = null; //default
+        Page<Location> locationPage0 = locationRepository.findByUserIdIncludingGlobal(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, pageSize));
+        Page<Location> locationPage1 = locationRepository.findByUserIdIncludingGlobal(CultureLogTestConfiguration.getUser1Id(), new PageRequest(1, pageSize));
+
+        //determine ids in pages
+        List<Long> savedLocationIdsOrderedDefault = savedLocationsIncludingGlobal.stream().map(location -> location.getId()).collect(Collectors.toList());
+        List<Long> locationIdListPage0 = savedLocationIdsOrderedDefault.subList(0, 3);
+        List<Long> locationIdListPage1 = savedLocationIdsOrderedDefault.subList(3, 5);
+
+        executeAndAssertGetLocationsPage(0, pageSize, sort, false, locationIdListPage0, locationPage0);
+        executeAndAssertGetLocationsPage(1, pageSize, sort, false, locationIdListPage1, locationPage1);
+    }
+
+    @Test
+    public void testGetLocations_withOwnExperiences_sortByLocationIdAsc() throws Exception {
+        List<Location> savedLocationsIncludingGlobal = createLocationsForUser(CultureLogTestConfiguration.getUser1Id());
+
+        int pageSize = 3;
+        String sort = "id";
+        Page<Location> locationPage0 = locationRepository.findByUserIdIncludingGlobal(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, pageSize));
+        Page<Location> locationPage1 = locationRepository.findByUserIdIncludingGlobal(CultureLogTestConfiguration.getUser1Id(), new PageRequest(1, pageSize));
+
+        //determine ids in pages
+        List<Long> savedLocationIdsOrderedDefault = savedLocationsIncludingGlobal.stream().map(location -> location.getId()).collect(Collectors.toList());
+        Collections.sort(savedLocationIdsOrderedDefault);
+        List<Long> locationIdListPage0 = savedLocationIdsOrderedDefault.subList(0, 3);
+        List<Long> locationIdListPage1 = savedLocationIdsOrderedDefault.subList(3, 5);
+
+        executeAndAssertGetLocationsPage(0, pageSize, sort, false, locationIdListPage0, locationPage0);
+        executeAndAssertGetLocationsPage(1, pageSize, sort, false, locationIdListPage1, locationPage1);
+    }
+
+    @Test
+    public void testGetLocations_withOwnExperiences_sortByLocationIdDesc() throws Exception {
+        List<Location> savedLocationsIncludingGlobal = createLocationsForUser(CultureLogTestConfiguration.getUser1Id());
+
+        int pageSize = 3;
+        String sort = "id";
+        Page<Location> locationPage0 = locationRepository.findByUserIdIncludingGlobal(CultureLogTestConfiguration.getUser1Id(), new PageRequest(0, pageSize));
+        Page<Location> locationPage1 = locationRepository.findByUserIdIncludingGlobal(CultureLogTestConfiguration.getUser1Id(), new PageRequest(1, pageSize));
+
+        //determine ids in pages
+        List<Long> savedLocationIdsOrderedDefault = savedLocationsIncludingGlobal.stream().map(location -> location.getId()).collect(Collectors.toList());
+        Collections.sort(savedLocationIdsOrderedDefault);
+        Collections.reverse(savedLocationIdsOrderedDefault);
+        List<Long> locationIdListPage0 = savedLocationIdsOrderedDefault.subList(0, 3);
+        List<Long> locationIdListPage1 = savedLocationIdsOrderedDefault.subList(3, 5);
+
+        executeAndAssertGetLocationsPage(0, pageSize, sort, true, locationIdListPage0, locationPage0);
+        executeAndAssertGetLocationsPage(1, pageSize, sort, true, locationIdListPage1, locationPage1);
+    }
+
+    // -----------------------------------------
     // url /locations/{locationId} OPTIONS
+    // -----------------------------------------
 
     @Test
     public void testLocationsOneUrl_allowedMethods() throws Exception {
         testUrlAllowedMethods(String.format(URL_LOCATIONS_ONE, CultureLogTestConfiguration.getGlobalLocationIdVooruit()), HttpMethod.GET, HttpMethod.PUT);
     }
 
+    // -----------------------------------------
     // url /locations/{locationId} GET
+    // -----------------------------------------
 
     @Test
     public void testGetLocationsOne_notAuthorized() throws Exception {
@@ -345,7 +406,9 @@ public class LocationControllerTest extends ControllerTestAbstract {
                 .andDo(print());
     }
 
+    // -----------------------------------------
     // url /locations/{locationId} PUT
+    // -----------------------------------------
 
     @Test
     public void testPutLocationsOne_notAuthorized() throws Exception {
@@ -533,5 +596,56 @@ public class LocationControllerTest extends ControllerTestAbstract {
         Assert.assertEquals(location.getName(), locationJson.get("name"));
         Assert.assertEquals(location.getDescription(), locationJson.get("description"));
         Assert.assertEquals(location.getUser() == null, locationJson.get("global"));
+    }
+
+    private void executeAndAssertGetLocationsPage(int page, int pageSize, String sort, boolean desc, List<Long> expectedIdList, Page pageInfoExpected) throws Exception {
+        MvcResult resultPage = mockMvc.perform(get(getUrlPaged(URL_LOCATIONS, page, pageSize, sort, desc))
+                .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.content", hasSize(expectedIdList.size())))
+                //paging info
+                .andExpect(jsonPath("$.totalElements", equalTo((int) pageInfoExpected.getTotalElements())))
+                .andExpect(jsonPath("$.totalPages", equalTo(pageInfoExpected.getTotalPages())))
+                .andExpect(jsonPath("$.first", equalTo(pageInfoExpected.isFirst())))
+                .andExpect(jsonPath("$.last", equalTo(pageInfoExpected.isLast())))
+                .andExpect(jsonPath("$.number", equalTo(pageInfoExpected.getNumber())))
+                .andExpect(jsonPath("$.numberOfElements", equalTo(pageInfoExpected.getNumberOfElements())))
+                .andExpect(jsonPath("$.size", equalTo(pageInfoExpected.getSize())))
+                .andReturn();
+
+        ReadContext ctx = JsonPath.parse(resultPage.getResponse().getContentAsString());
+        // test all experience id's are present
+        assertIdList(expectedIdList, ctx.read("$.content[*].id"));
+        for (Long expectedId : expectedIdList) {
+            assertLocation(locationRepository.findOne(expectedId), ctx.read(String.format("$.content.[?(@.id==%d)]", expectedId)));
+        }
+    }
+
+    /**
+     *
+     * @param userId
+     * @return ordered list, by name
+     * @throws CultureLogException
+     */
+    private List<Location> createLocationsForUser(Long userId) throws CultureLogException {
+        List<Location> savedLocations = new ArrayList<>();
+        User user1 = userRepository.findOne(userId);
+        savedLocations.add(locationService.getById(CultureLogTestConfiguration.getGlobalLocationIdKinepolis()));
+        savedLocations.add(locationService.getById(CultureLogTestConfiguration.getGlobalLocationIdVooruit()));
+        savedLocations.add(locationService.save(createLocationToSave("werk", user1)));
+        savedLocations.add(locationService.save(createLocationToSave("thuis", user1)));
+        savedLocations.add(locationService.save(createLocationToSave(savedLocations.get(0).getName(), user1)));
+        Collections.sort(savedLocations, new Comparator<Location>() {
+            @Override
+            public int compare(Location location, Location t1) {
+                int compareName = location.getName().compareTo(t1.getName());
+                if (compareName != 0) {
+                    return compareName;
+                }
+                return location.getId().compareTo(t1.getId());
+            }
+        });
+        return savedLocations;
     }
 }

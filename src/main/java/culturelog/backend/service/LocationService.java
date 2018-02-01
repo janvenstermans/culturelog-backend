@@ -5,6 +5,8 @@ import culturelog.backend.exception.CultureLogException;
 import culturelog.backend.exception.CultureLogExceptionKey;
 import culturelog.backend.repository.LocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,7 +19,7 @@ public interface LocationService {
 
     Location save(Location location) throws CultureLogException;
 
-    List<Location> getLocationsOfUserByUserId(Long userId, boolean includeGeneral);
+    Page<Location> getLocationsOfUserByUserId(Long userId, boolean includeGeneral, Pageable pageable);
 
     Location getById(Long userId);
 }

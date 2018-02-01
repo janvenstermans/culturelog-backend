@@ -12,6 +12,11 @@ import culturelog.backend.service.MessageService;
 import culturelog.backend.utils.LocationUtils;
 import culturelog.backend.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.Locale;
 
 /**
@@ -39,6 +43,13 @@ public class LocationController {
 
     @Autowired
     private MessageService messageService;
+
+    public static final int DEFAULT_PAGE_NUMBER = 0;
+    public static final int DEFAULT_PAGE_SIZE = 20;
+    public static final String DEFAULT_SORT_COLUMN_0 = "name";
+    public static final boolean DEFAULT_SORT_ASC_0 = true;
+    public static final String DEFAULT_SORT_COLUMN_1 = "id";
+    public static final boolean DEFAULT_SORT_ASC_1 = true;
 
     @RequestMapping(method = RequestMethod.POST)
     @PreAuthorize("isAuthenticated()")
@@ -59,10 +70,14 @@ public class LocationController {
 
     @RequestMapping(method = RequestMethod.GET)
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getLocationsOfUser() {
+    public ResponseEntity<?> getLocationsOfUser(@PageableDefault(page = DEFAULT_PAGE_NUMBER, size = DEFAULT_PAGE_SIZE)
+                                                    @SortDefault.SortDefaults({
+                                                            @SortDefault(sort = DEFAULT_SORT_COLUMN_0, direction = Sort.Direction.ASC),
+                                                            @SortDefault(sort = DEFAULT_SORT_COLUMN_1, direction = Sort.Direction.ASC)
+                                                    }) Pageable pageable) {
         Long userId = securityService.getLoggedInUserId();
-        List<Location> locationList = locationService.getLocationsOfUserByUserId(userId, true);
-        return ResponseEntity.ok(LocationUtils.toLocationDtoList(locationList));
+        Page<Location> locationPage = locationService.getLocationsOfUserByUserId(userId, true, pageable);
+        return ResponseEntity.ok(locationPage.map(LocationUtils::toLocationDto));
     }
 
     @RequestMapping(value = "/{locationId}", method = RequestMethod.GET)

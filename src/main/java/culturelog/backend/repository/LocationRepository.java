@@ -1,6 +1,8 @@
 package culturelog.backend.repository;
 
 import culturelog.backend.domain.Location;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -12,10 +14,10 @@ import java.util.Optional;
  */
 public interface LocationRepository extends JpaRepository<Location, Long> {
 
-    List<Location> findByUserId(Long userId);
+    Page<Location> findByUserId(Long userId, Pageable pageable);
 
     @Query("Select l from Location l where l.user is null or l.user.id = ?1")
-    List<Location> findByUserIdIncludingGlobal(Long userId);
+    Page<Location> findByUserIdIncludingGlobal(Long userId, Pageable pageable);
 
     Optional<Location> findByUserIdAndName(Long userId, String naam);
 
@@ -24,5 +26,5 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
      * @param naam
      * @return
      */
-    List<Location> findByName(String naam);
+    Page<Location> findByName(String naam, Pageable pageable);
 }

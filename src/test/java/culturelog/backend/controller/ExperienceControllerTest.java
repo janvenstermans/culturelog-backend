@@ -494,7 +494,7 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
     }
 
     @Test
-    public void testGetLocations_withOwnExperiences() throws Exception {
+    public void testGetExperiences_withOwnExperiences() throws Exception {
         //key: moment sortDate, value: savedExperience
         TreeMap<Date, Experience> savedExperiences = createExperiencesForUser(CultureLogTestConfiguration.getUser1Id());
 
@@ -514,7 +514,7 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
     }
 
     @Test
-    public void testGetLocations_withOwnExperiences_sortByExperienceIdAsc() throws Exception {
+    public void testGetExperiences_withOwnExperiences_sortByExperienceIdAsc() throws Exception {
         //key: moment sortDate, value: savedExperience
         TreeMap<Date, Experience> savedExperiences = createExperiencesForUser(CultureLogTestConfiguration.getUser1Id());
 
@@ -534,7 +534,7 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
     }
 
     @Test
-    public void testGetLocations_withOwnExperiences_sortByExperienceIdDesc() throws Exception {
+    public void testGetExperiences_withOwnExperiences_sortByExperienceIdDesc() throws Exception {
         //key: moment sortDate, value: savedExperience
         TreeMap<Date, Experience> savedExperiences = createExperiencesForUser(CultureLogTestConfiguration.getUser1Id());
 
@@ -564,28 +564,6 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
             experience.setType(ExperienceTypeUtils.toExperienceTypeDto(experienceType));
         }
         return experience;
-    }
-
-    private static String getUrlExperiencesPaged(Integer page, Integer size, String sort, boolean desc) {
-        if (page == null && size == null && sort == null) {
-            return URL_EXPERIENCES;
-        }
-        StringBuilder stringBuilder = new StringBuilder(URL_EXPERIENCES).append('?');
-        if (page != null) {
-            stringBuilder.append("page=").append(page).append('&');
-        }
-        if (size != null) {
-            stringBuilder.append("size=").append(size).append('&');
-        }
-        if (sort != null) {
-            stringBuilder.append("sort=").append(sort);
-            if (desc) {
-                stringBuilder.append(",desc");
-            }
-            stringBuilder.append('&');
-        }
-        stringBuilder.setLength(stringBuilder.length() - 1);
-        return stringBuilder.toString();
     }
 
     private void assertExperience(Experience experience, JSONArray jsonPathResult) {
@@ -644,7 +622,7 @@ public class ExperienceControllerTest extends ControllerTestAbstract {
     }
 
     private void executeAndAssertGetExperiencesPage(int page, int pageSize, String sort, boolean desc, List<Long> expectedIdList, Page pageInfoExpected) throws Exception {
-        MvcResult resultPage = mockMvc.perform(get(getUrlExperiencesPaged(page, pageSize, sort, desc))
+        MvcResult resultPage = mockMvc.perform(get(getUrlPaged(URL_EXPERIENCES, page, pageSize, sort, desc))
                 .with(httpBasic(CultureLogTestConfiguration.USER1_NAME, CultureLogTestConfiguration.USER1_PASS)))
                 .andExpect(status().isOk())
                 .andDo(print())
