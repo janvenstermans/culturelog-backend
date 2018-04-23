@@ -50,6 +50,8 @@ More in detail, this object contains info about:
 
 Default api url startpoint is host/api/...
 
+Swagger documentation at host/api/swagger-ui.html
+
 ### User endpoint
 
 create user: POST /users , body Json object UserCreateDto
